@@ -19,13 +19,12 @@ def extract_guinea_pig_only():
         if (count of foundContacts) > 0 then
             set targetContact to item 1 of foundContacts
             
-            -- Get all available properties
+            -- Get basic properties (SKIP NOTES to avoid error)
             set firstName to first name of targetContact
             set lastName to last name of targetContact
             set fullName to name of targetContact
             set orgName to organization of targetContact
             set jobTitle to job title of targetContact
-            set note to note of targetContact
             
             -- Get emails
             set emailList to emails of targetContact
@@ -41,22 +40,14 @@ def extract_guinea_pig_only():
                 set phoneData to phoneData & (value of phoneItem) & " (" & (label of phoneItem) & "), "
             end repeat
             
-            -- Get addresses (might be useful for country detection)
-            set addressList to addresses of targetContact
-            set addressData to ""
-            repeat with addressItem in addressList
-                set addressData to addressData & (formatted address of addressItem) & " (" & (label of addressItem) & "), "
-            end repeat
-            
             -- Handle missing values
             if firstName is missing value then set firstName to ""
             if lastName is missing value then set lastName to ""
             if fullName is missing value then set fullName to ""
             if orgName is missing value then set orgName to ""
             if jobTitle is missing value then set jobTitle to ""
-            if note is missing value then set note to ""
             
-            -- Return structured data
+            -- Return structured data (NO NOTES!)
             return "FOUND:" & return & ¬
                 "Full Name: " & fullName & return & ¬
                 "First Name: " & firstName & return & ¬
@@ -65,8 +56,6 @@ def extract_guinea_pig_only():
                 "Job Title: " & jobTitle & return & ¬
                 "Emails: " & emailData & return & ¬
                 "Phones: " & phoneData & return & ¬
-                "Addresses: " & addressData & return & ¬
-                "Notes: " & note & return & ¬
                 "END_CONTACT"
         else
             return "NOT_FOUND: No contact containing 'Guine' found in macOS Contacts"
