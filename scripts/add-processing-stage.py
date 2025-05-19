@@ -88,20 +88,28 @@ def test_processing_stages():
         print("\n🧪 Creating test prospects at different stages...")
         
         for prospect in test_prospects:
-            page = notion.pages.create(
-                parent={"database_id": database_id},
-                properties={
+                            # Build properties dict, skipping None values
+                properties = {
                     "Name": {"title": [{"text": {"content": prospect["name"]}}]},
                     "Processing Stage": {"select": {"name": prospect["stage"]}},
                     "Company": {"rich_text": [{"text": {"content": prospect["company"]}}]},
-                    "Job Title": {"rich_text": [{"text": {"content": prospect.get("job_title", "")}}]},
-                    "Score": {"number": prospect.get("score")} if prospect.get("score") else None,
                     "Status": {"select": {"name": prospect.get("status", "New")}},
                     "Priority": {"select": {"name": prospect.get("priority", "Medium")}},
                     "Source": {"select": {"name": "VIP List"}},
                     "Notes": {"rich_text": [{"text": {"content": prospect["notes"]}}]}
                 }
-            )
+                
+                # Add optional fields only if they have values
+                if prospect.get("job_title"):
+                    properties["Job Title"] = {"rich_text": [{"text": {"content": prospect["job_title"]}}]}
+                    
+                if prospect.get("score") is not None:
+                    properties["Score"] = {"number": prospect["score"]}
+                
+                page = notion.pages.create(
+                    parent={"database_id": database_id},
+                    properties=properties
+                )
             print(f"  ✅ Created: {prospect['name']} - {prospect['stage']}")
         
         print("\n🎯 Test prospects created! Check your database to see the processing stages in action.")
