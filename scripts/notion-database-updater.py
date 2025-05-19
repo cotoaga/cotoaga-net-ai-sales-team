@@ -326,21 +326,19 @@ def test_database_access():
         print(f"❌ Database test failed: {e}")
 
 if __name__ == "__main__":
-    # Add the database ID to .env if not already there
-    database_id = "1f8482605aa580678086c357b496422c"
+    # Load environment variables
+    load_dotenv()
     
-    # Check if .env exists and update it
-    env_file = ".env"
-    env_content = ""
+    # Check if we have the database ID
+    database_id = os.getenv("NOTION_PROSPECTS_DB_ID")
     
-    if os.path.exists(env_file):
-        with open(env_file, "r") as f:
-            env_content = f.read()
+    if not database_id:
+        print("❌ NOTION_PROSPECTS_DB_ID not found in .env")
+        print("Please make sure your .env file contains:")
+        print("NOTION_PROSPECTS_DB_ID=your_database_id_here")
+        exit(1)
     
-    if "NOTION_PROSPECTS_DB_ID=" not in env_content:
-        with open(env_file, "a") as f:
-            f.write(f"\nNOTION_PROSPECTS_DB_ID={database_id}\n")
-        print(f"✅ Added database ID to .env file")
+    print(f"🎯 Using database ID: {database_id}")
     
     # Now update the schema
     update_database_schema()
