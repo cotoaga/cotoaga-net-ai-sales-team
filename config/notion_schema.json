@@ -1,0 +1,92 @@
+{
+    "title": "EU AI Act Prospects",
+    "properties": {
+      "Name": {
+        "id": "title",
+        "type": "title"
+      },
+      "Company": {
+        "type": "rich_text"
+      },
+      "Job Title": {
+        "type": "rich_text"
+      },
+      "Email": {
+        "type": "email"
+      },
+      "Score": {
+        "type": "number",
+        "number": {
+          "format": "number"
+        }
+      },
+      "Status": {
+        "type": "select",
+        "select": {
+          "options": [
+            {"name": "New", "color": "gray"},
+            {"name": "Qualified", "color": "blue"},
+            {"name": "Contacted", "color": "yellow"},
+            {"name": "Responded", "color": "green"},
+            {"name": "Scheduled", "color": "purple"},
+            {"name": "Closed-Won", "color": "green"},
+            {"name": "Closed-Lost", "color": "red"}
+          ]
+        }
+      },
+      "Priority": {
+        "type": "select",
+        "select": {
+          "options": [
+            {"name": "VIP", "color": "red"},
+            {"name": "High", "color": "orange"},
+            {"name": "Medium", "color": "yellow"},
+            {"name": "Low", "color": "gray"}
+          ]
+        }
+      },
+      "Source": {
+        "type": "select",
+        "select": {
+          "options": [
+            {"name": "macOS Contacts", "color": "blue"},
+            {"name": "LinkedIn", "color": "purple"},
+            {"name": "VIP List", "color": "red"},
+            {"name": "Referral", "color": "green"}
+          ]
+        }
+      },
+      "Country": {
+        "type": "select",
+        "select": {
+          "options": [
+            {"name": "Germany", "color": "yellow"},
+            {"name": "France", "color": "blue"},
+            {"name": "Italy", "color": "green"},
+            {"name": "Netherlands", "color": "orange"},
+            {"name": "Spain", "color": "red"},
+            {"name": "Sweden", "color": "purple"},
+            {"name": "Denmark", "color": "pink"}
+          ]
+        }
+      },
+      "Last Contact": {
+        "type": "date"
+      },
+      "Next Follow-up": {
+        "type": "date"
+      },
+      "LinkedIn URL": {
+        "type": "url"
+      },
+      "Notes": {
+        "type": "rich_text"
+      },
+      "Created": {
+        "type": "created_time"
+      },
+      "Modified": {
+        "type": "last_edited_time"
+      }
+    }
+  }
