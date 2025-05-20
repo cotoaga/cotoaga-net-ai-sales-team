@@ -422,16 +422,20 @@ class PromptManager:
                     }
                 }
                 
-            response = self.notion.databases.query(
-                database_id=self.database_id,
-                filter=filter_obj if filter_obj else None,
-                sorts=[
+            query_params = {
+                "database_id": self.database_id,
+                "sorts": [
                     {
                         "property": "Last Modified",
                         "direction": "descending"
                     }
                 ]
-            )
+            }
+            
+            if filter_obj:
+                query_params["filter"] = filter_obj
+                
+            response = self.notion.databases.query(**query_params)
             
             prompts = []
             for page in response['results']:
