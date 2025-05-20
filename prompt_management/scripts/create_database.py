@@ -20,11 +20,13 @@ def create_prompts_database():
         print("Please ensure PROMPT_SECURITY_TOKEN is set in .env")
         sys.exit(1)
     
-    # Ask for parent page ID
-    parent_page_id = input("Enter Notion parent page ID to create the database in: ")
+    # Check for parent page ID in environment or ask for it
+    parent_page_id = os.getenv("NOTION_PARENT_PAGE_ID")
     if not parent_page_id:
-        print("❌ Parent page ID is required.")
-        sys.exit(1)
+        parent_page_id = input("Enter Notion parent page ID to create the database in: ")
+        if not parent_page_id:
+            print("❌ Parent page ID is required.")
+            sys.exit(1)
         
     # Check if PROMPT_DATABASE_ID already exists
     existing_prompts_db = os.getenv("PROMPT_DATABASE_ID")
