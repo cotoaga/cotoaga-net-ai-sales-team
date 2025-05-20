@@ -6,12 +6,15 @@ Run this once to set up a brand new database
 
 import os
 import sys
+import re
 from dotenv import load_dotenv
 from notion_client import Client
 
 load_dotenv()
 
 def create_prompts_database():
+    """Create a new Notion database for KHAOS prompts and return the database ID"""
+    database_id = None
     # Check for required environment variables
     notion_token = os.getenv("PROMPT_SECURITY_TOKEN")
     
@@ -94,8 +97,36 @@ def create_prompts_database():
         
         print("✅ Prompt library database created successfully!")
         print(f"Database ID: {database_id}")
-        print("\nAdd this to your .env file:")
-        print(f"PROMPT_DATABASE_ID={database_id}")
+        print("\nUpdating .env file with new database ID...")
+        
+        # Update the .env file with the new database ID
+        env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env")
+        updated_env_content = ""
+        
+        try:
+            with open(env_path, 'r') as env_file:
+                env_content = env_file.read()
+                if "PROMPT_DATABASE_ID=" in env_content:
+                    # Replace existing database ID
+                    updated_env_content = re.sub(
+                        r'PROMPT_DATABASE_ID=.*\n', 
+                        f'PROMPT_DATABASE_ID={database_id}\n', 
+                        env_content
+                    )
+                else:
+                    # Add new database ID under the prompt management section
+                    updated_env_content = env_content.replace(
+                        "# NOTION AI DB PROMPT MANAGEMENT SYSTEM\n# ==============================================\n", 
+                        "# NOTION AI DB PROMPT MANAGEMENT SYSTEM\n# ==============================================\nPROMPT_DATABASE_ID={database_id}\n"
+                    )
+                    
+            with open(env_path, 'w') as env_file:
+                env_file.write(updated_env_content)
+                print("✅ Updated .env file with new database ID")
+        except Exception as e:
+            print(f"❌ Error updating .env file: {e}")
+            print("\nPlease manually add this to your .env file:")
+            print(f"PROMPT_DATABASE_ID={database_id}")
         
         # Now create an initial page with instructions
         notion.pages.create(
@@ -145,10 +176,13 @@ def create_prompts_database():
         
         print("\n🎯 Created example page in the database")
         print(f"\nView your database at: https://notion.so/{database_id.replace('-', '')}")
+        return database_id
         
     except Exception as e:
         print(f"❌ Error creating database: {e}")
-        sys.exit(1)
+        return None
 
 if __name__ == "__main__":
-    create_prompts_database()
+    db_id = create_prompts_database()
+    if not db_id:
+        sys.exit(1)

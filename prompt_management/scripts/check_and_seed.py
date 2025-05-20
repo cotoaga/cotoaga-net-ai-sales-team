@@ -267,7 +267,22 @@ def main():
         print("Please create a .env file with PROMPT_SECURITY_TOKEN and PROMPT_DATABASE_ID")
         return
     
-    # Step 2: Check database schema
+    # Step 2: Check if database exists or create it
+    if not os.getenv("PROMPT_DATABASE_ID"):
+        print("\n⚠️ PROMPT_DATABASE_ID not found in .env")
+        create_response = input("Would you like to create a new database now? (y/n): ")
+        if create_response.lower() == 'y':
+            # Import the create_database function
+            sys.path.append(os.path.dirname(current_dir))
+            from scripts.create_database import create_prompts_database
+            create_prompts_database()
+            # Reload environment variables after database creation
+            load_dotenv()
+        else:
+            print("Please run create_database.py to create a new database")
+            return
+    
+    # Step 3: Check database schema
     print("\n🔧 Checking database schema...")
     schema_ok = check_database_schema()
     if not schema_ok:
@@ -275,11 +290,11 @@ def main():
         print("Please run create_database.py to create a new database")
         return
     
-    # Step 3: Count existing prompts
+    # Step 4: Count existing prompts
     prompt_count = count_existing_prompts()
     print(f"\n📊 Found {prompt_count} existing prompts in the database")
     
-    # Step 4: Add sample prompts if database is empty
+    # Step 5: Add sample prompts if database is empty
     if prompt_count == 0:
         response = input("Would you like to add sample prompts to the database? (y/n): ")
         if response.lower() == 'y':
