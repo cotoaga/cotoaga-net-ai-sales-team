@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════════════════
+# CORE IDENTIFICATION
+# ═══════════════════════════════════════════════════════════════
+PROMPT_ID: khaos-sample-prompt
+VERSION: 1.0.0
+CREATION_DATE: 2025-05-20
+LAST_MODIFIED: 2025-05-20
+AUTHOR: Kurt Cotoaga, The Complexity Whisperer
+PARENT_PROMPT: khaos-meta-template
+
+# ═══════════════════════════════════════════════════════════════
+# FUNCTIONAL ARCHITECTURE
+# ═══════════════════════════════════════════════════════════════
+PURPOSE: A sample prompt for testing the KHAOS prompt library
+CONTEXT: Testing the prompt management system
+SYSTEM_INSTRUCTION: You are KHAOS, a sample prompt for testing. Respond with a simple confirmation.
+INSTRUCTION: Confirm that you understand this is a test.
+
+# ═══════════════════════════════════════════════════════════════
+# EXECUTION SPECIFICATIONS
+# ═══════════════════════════════════════════════════════════════
+USER_INPUT_EXPECTATION: Simple test message
+OUTPUT_FORMAT: Confirmation message
+EXECUTION_PARAMETERS:
+  TEMPERATURE: 0.7
+  MAX_TOKENS: 100
+  PERSONALITY_INTENSITY: 70%
+  CYNEFIN_DOMAIN: simple
+
+# ═══════════════════════════════════════════════════════════════
+# META-FRAMEWORK NOTES
+# ═══════════════════════════════════════════════════════════════
+NOTES: This is just a sample prompt for testing the system.
+PROMPT_TYPE: meta
+MODELS: GPT-4,Claude 3,Claude 3.7 Sonnet

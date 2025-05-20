@@ -5,6 +5,12 @@ For when you've already created a database but need to add all the properties.
 """
 
 import os
+
+# Add the parent directory to the sys.path to find modules
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
 import json
 from dotenv import load_dotenv
 from notion_client import Client

@@ -14,21 +14,7 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 import argparse
-try:
-    # Try with hyphen (file name)
-    from prompt_manager import PromptManager
-except ImportError:
-    try:
-        # Try with underscore (module name)
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("prompt_manager", os.path.join(parent_dir, "prompt-manager.py"))
-        prompt_manager = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(prompt_manager)
-        PromptManager = prompt_manager.PromptManager
-    except Exception as e:
-        print(f"❌ Error importing PromptManager: {e}")
-        print("Please ensure prompt-manager.py is in the same directory as this script or in the parent directory")
-        sys.exit(1)
+from prompt_manager import PromptManager
 
 def main():
     parser = argparse.ArgumentParser(description="KHAOS Prompt Library Manager")
@@ -71,7 +57,7 @@ def main():
         print("Please add the following to your .env file:")
         print("NOTION_PROMPTS_DB_ID=your_prompts_database_id")
         print("\nYou can also run:")
-        print("1. python create-database.py (to create a new database)")
+        print("1. python create_database.py (to create a new database)")
         print("2. python env_manager.py (to update your configuration)")
         sys.exit(1)
     
