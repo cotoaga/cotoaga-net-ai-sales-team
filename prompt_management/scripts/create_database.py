@@ -26,19 +26,29 @@ def create_prompts_database():
     # Check for parent page ID in environment or ask for it
     parent_page_id = os.getenv("NOTION_PARENT_PAGE_ID")
     if not parent_page_id:
-        parent_page_id = input("Enter Notion parent page ID to create the database in: ")
-        if not parent_page_id:
-            print("❌ Parent page ID is required.")
-            sys.exit(1)
+        try:
+            parent_page_id = input("Enter Notion parent page ID to create the database in: ")
+            if not parent_page_id:
+                print("❌ Parent page ID is required.")
+                return None
+        except EOFError:
+            print("❌ Cannot create database: Parent page ID required but not provided in environment")
+            print("Please set NOTION_PARENT_PAGE_ID in your .env file")
+            return None
         
     # Check if PROMPT_DATABASE_ID already exists
     existing_prompts_db = os.getenv("PROMPT_DATABASE_ID")
     if existing_prompts_db:
         print("⚠️ PROMPT_DATABASE_ID is already set in your .env file.")
-        confirm = input("Do you still want to create a new prompts database? (y/n): ")
-        if confirm.lower() != 'y':
-            print("Operation cancelled.")
-            sys.exit(0)
+        try:
+            confirm = input("Do you still want to create a new prompts database? (y/n): ")
+            if confirm.lower() != 'y':
+                print("Operation cancelled.")
+                return None
+        except EOFError:
+            # In non-interactive mode, don't replace existing DB
+            print("Operation cancelled in non-interactive mode.")
+            return existing_prompts_db
     
     # Initialize Notion client
     notion = Client(auth=notion_token)
