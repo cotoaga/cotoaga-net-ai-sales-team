@@ -423,14 +423,23 @@ class PromptManager:
                 }
                 
             query_params = {
-                "database_id": self.database_id,
-                "sorts": [
-                    {
-                        "property": "Last Modified",
-                        "direction": "descending"
-                    }
-                ]
+                "database_id": self.database_id
             }
+            
+            # Only add sort if we're confident the property exists
+            try:
+                # Check if the database has the Last Modified property
+                db = self.notion.databases.retrieve(database_id=self.database_id)
+                if "Last Modified" in db["properties"]:
+                    query_params["sorts"] = [
+                        {
+                            "property": "Last Modified",
+                            "direction": "descending"
+                        }
+                    ]
+            except Exception:
+                # Skip sorting if there's an error checking the properties
+                pass
             
             if filter_obj:
                 query_params["filter"] = filter_obj
