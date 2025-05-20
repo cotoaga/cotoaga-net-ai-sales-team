@@ -272,9 +272,23 @@ class PromptManager:
             return False
         
         try:
+            # Get the database to determine the title property name
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            title_property_name = None
+            
+            # Find the title property
+            for prop_name, prop in db['properties'].items():
+                if prop['type'] == 'title':
+                    title_property_name = prop_name
+                    break
+            
+            if not title_property_name:
+                print("❌ Error: No title property found in the database")
+                return False
+                
             # Prepare properties for Notion
             properties = {
-                "Prompt ID": {
+                title_property_name: {
                     "title": [{"text": {"content": prompt_data['Prompt ID']}}]
                 },
                 "Version": {
@@ -326,11 +340,25 @@ class PromptManager:
     def read_prompt(self, prompt_id):
         """Retrieve a prompt from the database by ID."""
         try:
+            # Get the database to determine the title property name
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            title_property_name = None
+            
+            # Find the title property
+            for prop_name, prop in db['properties'].items():
+                if prop['type'] == 'title':
+                    title_property_name = prop_name
+                    break
+            
+            if not title_property_name:
+                print("❌ Error: No title property found in the database")
+                return False
+            
             # Query the database for the prompt
             response = self.notion.databases.query(
                 database_id=self.database_id,
                 filter={
-                    "property": "Prompt ID",
+                    "property": title_property_name,
                     "title": {
                         "equals": prompt_id
                     }
@@ -346,7 +374,7 @@ class PromptManager:
             # Extract data from the page
             extracted_data = {
                 "id": page['id'],
-                "Prompt ID": page['properties']['Prompt ID']['title'][0]['plain_text'] if page['properties']['Prompt ID']['title'] else "",
+                "Prompt ID": page['properties'][title_property_name]['title'][0]['plain_text'] if page['properties'][title_property_name]['title'] else "",
                 "Full Prompt": page['properties']['Full Prompt']['rich_text'][0]['plain_text'] if page['properties']['Full Prompt']['rich_text'] else ""
             }
             
@@ -484,15 +512,43 @@ class PromptManager:
                 
             response = self.notion.databases.query(**query_params)
             
+            # Get the database to determine the title property name
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            title_property_name = None
+            
+            # Find the title property
+            for prop_name, prop in db['properties'].items():
+                if prop['type'] == 'title':
+                    title_property_name = prop_name
+                    break
+            
+            if not title_property_name:
+                print("❌ Error: No title property found in the database")
+                return []
+                
             prompts = []
             for page in response['results']:
                 prompt_data = {
                     "id": page['id'],
-                    "Prompt ID": page['properties']['Prompt ID']['title'][0]['plain_text'] if page['properties']['Prompt ID']['title'] else "",
-                    "Version": page['properties']['Version']['rich_text'][0]['plain_text'] if page['properties']['Version']['rich_text'] else "",
-                    "Type": page['properties']['Type']['select']['name'] if page['properties']['Type']['select'] else "",
-                    "Last Modified": page['properties']['Last Modified']['date']['start'] if page['properties']['Last Modified']['date'] else ""
+                    "Prompt ID": page['properties'][title_property_name]['title'][0]['plain_text'] if page['properties'][title_property_name]['title'] else "",
                 }
+                
+                # Add optional properties if they exist
+                if 'Version' in page['properties'] and page['properties']['Version'].get('rich_text'):
+                    prompt_data["Version"] = page['properties']['Version']['rich_text'][0]['plain_text']
+                else:
+                    prompt_data["Version"] = ""
+                    
+                if 'Type' in page['properties'] and page['properties']['Type'].get('select'):
+                    prompt_data["Type"] = page['properties']['Type']['select']['name']
+                else:
+                    prompt_data["Type"] = ""
+                    
+                if 'Last Modified' in page['properties'] and page['properties']['Last Modified'].get('date'):
+                    prompt_data["Last Modified"] = page['properties']['Last Modified']['date']['start']
+                else:
+                    prompt_data["Last Modified"] = ""
+                    
                 prompts.append(prompt_data)
                 
             print(f"✅ Retrieved {len(prompts)} prompts")
