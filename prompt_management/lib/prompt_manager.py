@@ -32,11 +32,32 @@ class PromptManager:
     
     def setup_database(self):
         """Creates or updates the prompt library database schema."""
+        # First check if we can access the database
+        try:
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            print(f"Found existing database: {db['title'][0]['plain_text'] if db.get('title') else 'Untitled'}")
+            
+            # Check if title property exists and is named correctly
+            title_found = False
+            for prop_name, prop in db['properties'].items():
+                if prop['type'] == 'title':
+                    title_found = True
+                    if prop_name != "Prompt ID":
+                        print(f"Warning: Title property is named '{prop_name}' instead of 'Prompt ID'")
+                        print("Note: Title properties cannot be renamed through the API")
+                    break
+                    
+            if not title_found:
+                print("❌ Error: Database doesn't have a title property")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error accessing database: {e}")
+            print("Please check your PROMPT_SECURITY_TOKEN and PROMPT_DATABASE_ID")
+            return False
+            
+        # Define new properties to add (except title property which can't be modified)
         new_properties = {
-            "Prompt ID": {
-                "type": "title",
-                "title": {}
-            },
             "Version": {
                 "type": "rich_text",
                 "rich_text": {}
@@ -160,18 +181,35 @@ class PromptManager:
         try:
             print("🔍 Setting up prompt library database schema...")
             
+            # Get current properties 
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            current_properties = db.get('properties', {})
+            
+            # Add only properties that don't exist yet
+            properties_to_add = {}
+            for prop_name, prop_config in new_properties.items():
+                if prop_name not in current_properties:
+                    properties_to_add[prop_name] = prop_config
+                    print(f"Adding property: {prop_name}")
+            
+            if not properties_to_add:
+                print("✅ All required properties already exist!")
+                return True
+                
             # Update the database with new properties
             response = self.notion.databases.update(
                 database_id=self.database_id,
-                properties=new_properties
+                properties=properties_to_add
             )
             
             print("✅ Database schema updated successfully!")
-            print(f"Database: {response['title'][0]['plain_text']}")
+            print(f"Database: {response['title'][0]['plain_text'] if response.get('title') else 'Untitled'}")
             print(f"Total properties: {len(response['properties'])}")
+            return True
             
         except Exception as e:
             print(f"❌ Error updating database: {e}")
+            return False
     
     def parse_prompt_file(self, file_path):
         """Parse a prompt file into structured data."""

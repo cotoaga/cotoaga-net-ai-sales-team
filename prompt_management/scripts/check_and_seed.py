@@ -58,8 +58,13 @@ def check_database_schema():
             response = input("Would you like to fix the database schema? (y/n): ")
             if response.lower() == 'y':
                 manager = PromptManager()
-                manager.setup_database()
-                return True
+                if manager.setup_database():
+                    print("✅ Database schema has been updated")
+                    return True
+                else:
+                    print("❌ Failed to update database schema")
+                    print("Try running create_database.py to create a new database first")
+                    return False
             else:
                 return False
         else:
