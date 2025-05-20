@@ -55,8 +55,22 @@ def check_database_schema():
             print(f"❌ Missing required properties: {', '.join(missing_properties)}")
             
             # Ask if user wants to fix the schema
-            response = input("Would you like to fix the database schema? (y/n): ")
-            if response.lower() == 'y':
+            try:
+                response = input("Would you like to fix the database schema? (y/n): ")
+                if response.lower() == 'y':
+                    manager = PromptManager()
+                    if manager.setup_database():
+                        print("✅ Database schema has been updated")
+                        return True
+                    else:
+                        print("❌ Failed to update database schema")
+                        print("Try running create_database.py to create a new database first")
+                        return False
+                else:
+                    return False
+            except EOFError:
+                # Handle automated environments (like CI) where input() might cause EOF
+                print("\nAutomatically attempting to fix schema...")
                 manager = PromptManager()
                 if manager.setup_database():
                     print("✅ Database schema has been updated")
@@ -65,8 +79,6 @@ def check_database_schema():
                     print("❌ Failed to update database schema")
                     print("Try running create_database.py to create a new database first")
                     return False
-            else:
-                return False
         else:
             print("✅ Database schema looks good!")
             return True
@@ -270,17 +282,27 @@ def main():
     # Step 2: Check if database exists or create it
     if not os.getenv("PROMPT_DATABASE_ID"):
         print("\n⚠️ PROMPT_DATABASE_ID not found in .env")
-        create_response = input("Would you like to create a new database now? (y/n): ")
-        if create_response.lower() == 'y':
+        try:
+            create_response = input("Would you like to create a new database now? (y/n): ")
+            if create_response.lower() == 'y':
+                # Import the create_database function
+                sys.path.append(os.path.dirname(current_dir))
+                from scripts.create_database import create_prompts_database
+                create_prompts_database()
+                # Reload environment variables after database creation
+                load_dotenv()
+            else:
+                print("Please run create_database.py to create a new database")
+                return
+        except EOFError:
+            # Handle automated environments
+            print("\nAutomatically creating new database...")
             # Import the create_database function
             sys.path.append(os.path.dirname(current_dir))
             from scripts.create_database import create_prompts_database
             create_prompts_database()
             # Reload environment variables after database creation
             load_dotenv()
-        else:
-            print("Please run create_database.py to create a new database")
-            return
     
     # Step 3: Check database schema
     print("\n🔧 Checking database schema...")
@@ -296,11 +318,16 @@ def main():
     
     # Step 5: Add sample prompts if database is empty
     if prompt_count == 0:
-        response = input("Would you like to add sample prompts to the database? (y/n): ")
-        if response.lower() == 'y':
+        try:
+            response = input("Would you like to add sample prompts to the database? (y/n): ")
+            if response.lower() == 'y':
+                create_sample_prompts()
+            else:
+                print("Skipping sample data creation")
+        except EOFError:
+            # Handle automated environments
+            print("\nAutomatically adding sample prompts...")
             create_sample_prompts()
-        else:
-            print("Skipping sample data creation")
     else:
         print("✅ Database already contains prompts - skipping sample data creation")
     
