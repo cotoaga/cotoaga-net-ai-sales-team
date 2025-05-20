@@ -14,7 +14,7 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 import argparse
-from prompt_manager import PromptManager
+from lib.prompt_manager import PromptManager
 
 def main():
     parser = argparse.ArgumentParser(description="KHAOS Prompt Library Manager")
@@ -52,13 +52,12 @@ def main():
     manager = PromptManager()
     
     # Check if we're properly configured
-    if not os.getenv("NOTION_PROMPTS_DB_ID"):
-        print("❌ Error: NOTION_PROMPTS_DB_ID not set in .env file")
+    if not os.getenv("PROMPT_DATABASE_ID"):
+        print("❌ Error: PROMPT_DATABASE_ID not set in .env file")
         print("Please add the following to your .env file:")
-        print("NOTION_PROMPTS_DB_ID=your_prompts_database_id")
+        print("PROMPT_DATABASE_ID=your_prompts_database_id")
         print("\nYou can also run:")
         print("1. python create_database.py (to create a new database)")
-        print("2. python env_manager.py (to update your configuration)")
         sys.exit(1)
     
     # Execute the appropriate command

@@ -13,18 +13,23 @@ load_dotenv()
 
 def create_prompts_database():
     # Check for required environment variables
-    notion_token = os.getenv("NOTION_TOKEN")
-    parent_page_id = os.getenv("NOTION_PARENT_PAGE_ID")
+    notion_token = os.getenv("PROMPT_SECURITY_TOKEN")
     
-    if not notion_token or not parent_page_id:
+    if not notion_token:
         print("❌ Missing environment variables.")
-        print("Please ensure both NOTION_TOKEN and NOTION_PARENT_PAGE_ID are set in .env")
+        print("Please ensure PROMPT_SECURITY_TOKEN is set in .env")
+        sys.exit(1)
+    
+    # Ask for parent page ID
+    parent_page_id = input("Enter Notion parent page ID to create the database in: ")
+    if not parent_page_id:
+        print("❌ Parent page ID is required.")
         sys.exit(1)
         
-    # Check if NOTION_PROMPTS_DB_ID already exists
-    existing_prompts_db = os.getenv("NOTION_PROMPTS_DB_ID")
+    # Check if PROMPT_DATABASE_ID already exists
+    existing_prompts_db = os.getenv("PROMPT_DATABASE_ID")
     if existing_prompts_db:
-        print("⚠️ NOTION_PROMPTS_DB_ID is already set in your .env file.")
+        print("⚠️ PROMPT_DATABASE_ID is already set in your .env file.")
         confirm = input("Do you still want to create a new prompts database? (y/n): ")
         if confirm.lower() != 'y':
             print("Operation cancelled.")
@@ -88,7 +93,7 @@ def create_prompts_database():
         print("✅ Prompt library database created successfully!")
         print(f"Database ID: {database_id}")
         print("\nAdd this to your .env file:")
-        print(f"NOTION_PROMPTS_DB_ID={database_id}")
+        print(f"PROMPT_DATABASE_ID={database_id}")
         
         # Now create an initial page with instructions
         notion.pages.create(

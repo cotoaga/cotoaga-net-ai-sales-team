@@ -19,18 +19,18 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-from prompt_manager import PromptManager
+from lib.prompt_manager import PromptManager
 
 load_dotenv()
 
 def check_database_schema():
     """Check if the database exists and has the correct schema"""
-    notion_token = os.getenv("NOTION_TOKEN")
-    db_id = os.getenv("NOTION_PROMPTS_DB_ID")
+    notion_token = os.getenv("PROMPT_SECURITY_TOKEN")
+    db_id = os.getenv("PROMPT_DATABASE_ID")
     
     if not notion_token or not db_id:
         print("❌ Error: Environment variables not set")
-        print("Please ensure both NOTION_TOKEN and NOTION_PROMPTS_DB_ID are set in .env")
+        print("Please ensure both PROMPT_SECURITY_TOKEN and PROMPT_DATABASE_ID are set in .env")
         return False
     
     try:
@@ -73,8 +73,8 @@ def check_database_schema():
 
 def count_existing_prompts():
     """Count how many prompts exist in the database"""
-    notion_token = os.getenv("NOTION_TOKEN")
-    db_id = os.getenv("NOTION_PROMPTS_DB_ID")
+    notion_token = os.getenv("PROMPT_SECURITY_TOKEN")
+    db_id = os.getenv("PROMPT_DATABASE_ID")
     
     try:
         notion = Client(auth=notion_token)
@@ -91,7 +91,7 @@ def create_sample_prompts():
     # Sample prompts data
     sample_prompts = [
         {
-            "file_path": "prompts/khaos-meta-template.txt",
+            "file_path": "templates/khaos-meta-template.txt",
             "content": """# ═══════════════════════════════════════════════════════════════
 # CORE IDENTIFICATION
 # ═══════════════════════════════════════════════════════════════
@@ -131,7 +131,7 @@ LANGUAGE: en
 """
         },
         {
-            "file_path": "prompts/khaos-core-persona.txt",
+            "file_path": "templates/khaos-core-persona.txt",
             "content": """# ═══════════════════════════════════════════════════════════════
 # CORE IDENTIFICATION
 # ═══════════════════════════════════════════════════════════════
@@ -175,7 +175,7 @@ LANGUAGE: en
 """
         },
         {
-            "file_path": "prompts/khaos-ai-act-consultant.txt",
+            "file_path": "templates/khaos-ai-act-consultant.txt",
             "content": """# ═══════════════════════════════════════════════════════════════
 # CORE IDENTIFICATION
 # ═══════════════════════════════════════════════════════════════
@@ -220,17 +220,17 @@ LANGUAGE: en
         }
     ]
     
-    # Create the prompts directory if it doesn't exist
-    prompts_dir = os.path.join(parent_dir, "prompts")
-    if not os.path.exists(prompts_dir):
-        os.makedirs(prompts_dir)
-        print(f"✅ Created prompts directory: {prompts_dir}")
+    # Create the templates directory if it doesn't exist
+    templates_dir = os.path.join(parent_dir, "templates")
+    if not os.path.exists(templates_dir):
+        os.makedirs(templates_dir)
+        print(f"✅ Created templates directory: {templates_dir}")
     
     # Write the sample prompts to files
     for sample in sample_prompts:
         file_path = os.path.join(parent_dir, sample["file_path"])
         
-        # Create directories if needed
+        # Make sure templates directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         
         # Write the file
@@ -257,9 +257,9 @@ def main():
     print("======================================================")
     
     # Step 1: Check if .env file exists
-    if not os.path.exists(os.path.join(parent_dir, ".env")):
+    if not os.path.exists(os.path.join(os.path.dirname(parent_dir), ".env")):
         print("❌ Error: .env file not found")
-        print("Please create a .env file with NOTION_TOKEN and NOTION_PROMPTS_DB_ID")
+        print("Please create a .env file with PROMPT_SECURITY_TOKEN and PROMPT_DATABASE_ID")
         return
     
     # Step 2: Check database schema

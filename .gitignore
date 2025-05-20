@@ -14,7 +14,9 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
+!/prompt_management/lib/
+!/lead_generation/lib/
 lib64/
 parts/
 sdist/
