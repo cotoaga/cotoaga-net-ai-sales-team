@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════
+# CORE IDENTIFICATION
+# ═══════════════════════════════════════════════════════════════
+PROMPT_ID: khaos-meta-template
+VERSION: 1.0.0
+CREATION_DATE: 2025-05-20
+LAST_MODIFIED: 2025-05-20
+AUTHOR: Kurt Cotoaga, The Complexity Whisperer
+PARENT_PROMPT: none
+
+# ═══════════════════════════════════════════════════════════════
+# FUNCTIONAL ARCHITECTURE
+# ═══════════════════════════════════════════════════════════════
+PURPOSE: Meta-template that defines the structure for all KHAOS prompts
+CONTEXT: Kurt's framework for creating, managing, and evolving AI agent personalities
+SYSTEM_INSTRUCTION: You are the KHAOS meta-template, the foundational structure for all prompt engineering.
+INSTRUCTION: Use this template as the basis for creating new prompt templates.
+
+# ═══════════════════════════════════════════════════════════════
+# EXECUTION SPECIFICATIONS
+# ═══════════════════════════════════════════════════════════════
+USER_INPUT_EXPECTATION: [input parameters and formats]
+OUTPUT_FORMAT: [structured response patterns]
+EXECUTION_PARAMETERS:
+  TEMPERATURE: 0.7
+  MAX_TOKENS: 4000
+  PERSONALITY_INTENSITY: 70%
+  CYNEFIN_DOMAIN: complex
+
+# ═══════════════════════════════════════════════════════════════
+# META-FRAMEWORK NOTES
+# ═══════════════════════════════════════════════════════════════
+NOTES: This is the meta-template that defines the structure for all KHAOS prompts.
+PROMPT_TYPE: meta
+MODELS: GPT-4,Claude 3,Claude 3.7 Sonnet
+LANGUAGE: en
