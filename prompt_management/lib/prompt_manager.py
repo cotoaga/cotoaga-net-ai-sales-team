@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-KHAOS Prompt Manager - CRUD operations for prompt libraries
-NOW WITH ARCHAEOLOGICAL DNA ANALYSIS SUPERPOWERS!
+KHAOS Prompt Manager - ARCHAEOLOGICAL SYNCHRONIZATION UPDATE
+Enhanced to work in perfect harmony with the CLI and DB checker
+Because evolution requires coordination, not chaos.
 """
 
 import os
@@ -19,17 +20,219 @@ load_dotenv()
 
 class PromptManager:
     def __init__(self):
+        # Use the correct token name from DB checker
         self.notion = Client(auth=os.getenv("PROMPT_SECURITY_TOKEN"))
         self.database_id = os.getenv("PROMPT_DATABASE_ID")
         
         # Initialize the Prompt Archaeologist personality
         self._initialize_archaeologist_personality()
         
+        # Load the complete expected schema from DB checker
+        self.expected_schema = self._get_complete_schema()
+        
         if not self.database_id:
             print("❌ PROMPT_DATABASE_ID not found in .env")
             print("Please add your database ID to the .env file")
             print("Example: PROMPT_DATABASE_ID=bf9c35d5e8a646c7b5476c57a91234ef")
             return
+    
+    def _get_complete_schema(self) -> Dict[str, Dict]:
+        """Define the complete expected schema matching the DB checker"""
+        return {
+            # Core identification fields
+            "Prompt ID": {
+                "type": "title",
+                "required": True,
+                "description": "Primary identifier - auto-title field"
+            },
+            "Version": {
+                "type": "rich_text",
+                "required": True,
+                "description": "Version number (semantic versioning)"
+            },
+            "Type": {
+                "type": "select",
+                "required": True,
+                "options": [
+                    {"name": "meta", "color": "red"},
+                    {"name": "consultation", "color": "blue"},
+                    {"name": "workshop", "color": "green"},
+                    {"name": "analysis", "color": "yellow"},
+                    {"name": "creation", "color": "purple"},
+                    {"name": "viral", "color": "orange"},
+                    {"name": "coding-companion", "color": "pink"}
+                ],
+                "description": "Prompt category classification"
+            },
+            "Purpose": {
+                "type": "rich_text",
+                "required": True,
+                "description": "What this prompt achieves"
+            },
+            
+            # Content and structure
+            "Full Prompt": {
+                "type": "rich_text",
+                "required": True,
+                "description": "Complete prompt content"
+            },
+            "Core Message": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Central theme or message"
+            },
+            
+            # Archaeological analysis fields (SYNCHRONIZED WITH DB CHECKER)
+            "DNA Hash": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Content fingerprint for uniqueness tracking"
+            },
+            "Complexity Score": {
+                "type": "number",
+                "required": False,
+                "description": "Calculated complexity rating (0-10)"
+            },
+            "Effectiveness Score": {
+                "type": "number",
+                "required": False,
+                "description": "Predicted effectiveness (0-1)"
+            },
+            "Personality Mix": {
+                "type": "rich_text",
+                "required": False,
+                "description": "JSON of personality trait ratios"
+            },
+            "Analysis Date": {
+                "type": "date",
+                "required": False,
+                "description": "When last analyzed"
+            },
+            "Health Status": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "Healthy", "color": "green"},
+                    {"name": "Needs Optimization", "color": "yellow"},
+                    {"name": "Problematic", "color": "red"},
+                    {"name": "Excellent", "color": "blue"},
+                    {"name": "Unanalyzed", "color": "gray"}
+                ],
+                "description": "Current health assessment"
+            },
+            "Viral Coefficient": {
+                "type": "number",
+                "required": False,
+                "description": "Meme propagation potential (0-1)"
+            },
+            
+            # Multi-select categorization (MATCHING DB CHECKER)
+            "Viral Hooks": {
+                "type": "multi_select",
+                "required": False,
+                "options": [
+                    {"name": "Complexity Whisperer", "color": "green"},
+                    {"name": "KHAOS", "color": "red"},
+                    {"name": "Meme Machine", "color": "orange"},
+                    {"name": "Schrödinger's Agile", "color": "blue"},
+                    {"name": "AI Act Navigator", "color": "purple"}
+                ],
+                "description": "Memorable phrases and concepts"
+            },
+            "Models": {
+                "type": "multi_select",
+                "required": False,
+                "options": [
+                    {"name": "GPT-4", "color": "green"},
+                    {"name": "Claude 3", "color": "blue"},
+                    {"name": "Claude 3.7 Sonnet", "color": "purple"},
+                    {"name": "Claude Sonnet 4", "color": "red"},
+                    {"name": "Perplexity", "color": "yellow"},
+                    {"name": "Grok 3", "color": "orange"},
+                    {"name": "Gemini 2.5 Pro", "color": "pink"}
+                ],
+                "description": "Compatible AI models"
+            },
+            "Usage Contexts": {
+                "type": "multi_select",
+                "required": False,
+                "options": [
+                    {"name": "EU AI Act", "color": "blue"},
+                    {"name": "Workshops", "color": "green"},
+                    {"name": "Coding", "color": "purple"},
+                    {"name": "Sales", "color": "yellow"},
+                    {"name": "Content Creation", "color": "orange"},
+                    {"name": "Consulting", "color": "red"}
+                ],
+                "description": "Where this prompt is used"
+            },
+            "Tags": {
+                "type": "multi_select",
+                "required": False,
+                "options": [
+                    {"name": "persona", "color": "red"},
+                    {"name": "core", "color": "blue"},
+                    {"name": "sarcasm", "color": "orange"},
+                    {"name": "consulting", "color": "green"},
+                    {"name": "transformation", "color": "purple"},
+                    {"name": "complexity", "color": "yellow"},
+                    {"name": "optimization", "color": "pink"}
+                ],
+                "description": "Searchable tags"
+            },
+            
+            # Metadata and tracking
+            "Creation Date": {
+                "type": "date",
+                "required": False,
+                "description": "When prompt was created"
+            },
+            "Last Modified": {
+                "type": "date",
+                "required": False,
+                "description": "When prompt was last updated"
+            },
+            "Parent Prompt": {
+                "type": "relation",
+                "required": False,
+                "description": "Parent-child relationships for lineage"
+            },
+            "Generation": {
+                "type": "number",
+                "required": False,
+                "description": "Evolution generation number"
+            },
+            
+            # Configuration fields
+            "Temperature": {
+                "type": "number",
+                "required": False,
+                "description": "AI model temperature setting"
+            },
+            "Personality Intensity": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "40%", "color": "gray"},
+                    {"name": "50%", "color": "blue"},
+                    {"name": "60%", "color": "green"},
+                    {"name": "70%", "color": "yellow"},
+                    {"name": "80%", "color": "red"}
+                ],
+                "description": "Personality strength setting"
+            },
+            "Security Level": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "public", "color": "green"},
+                    {"name": "client", "color": "blue"},
+                    {"name": "private", "color": "orange"},
+                    {"name": "classified", "color": "red"}
+                ],
+                "description": "Access control level"
+            }
+        }
     
     def _initialize_archaeologist_personality(self):
         """Initialize the Prompt Archaeologist's analytical personality"""
@@ -68,13 +271,13 @@ class PromptManager:
         return random.choice(self.analysis_phrases[personality_type])
     
     # ═══════════════════════════════════════════════════════════════
-    # PROMPT DNA ANALYSIS METHODS (The Archaeological Superpowers)
+    # ENHANCED ARCHAEOLOGICAL DNA ANALYSIS (SYNCHRONIZED)
     # ═══════════════════════════════════════════════════════════════
     
     def analyze_prompt_dna(self, prompt_id: str) -> Optional[Dict[str, Any]]:
         """
-        Analyze prompt structure and extract DNA profile
-        Returns comprehensive analysis of prompt genetics
+        ENHANCED: Analyze prompt structure and store results in database
+        Now automatically updates the Notion database with analysis results
         """
         print(f"🔍 {self._get_analysis_phrase('sherlock')}...")
         
@@ -109,7 +312,390 @@ class PromptManager:
             dna_profile['personality_ratios']
         )
         
+        # NEW: Automatically store analysis results in database
+        self._store_analysis_results(prompt_id, dna_profile)
+        
         return dna_profile
+    
+    def _store_analysis_results(self, prompt_id: str, dna_profile: Dict[str, Any]):
+        """Store archaeological analysis results directly in the Notion database"""
+        try:
+            # Get the existing record
+            existing_record = self.read_prompt(prompt_id)
+            if not existing_record:
+                print(f"❌ Cannot store analysis for non-existent prompt: {prompt_id}")
+                return False
+            
+            # Determine health status
+            effectiveness = dna_profile['effectiveness_score']
+            complexity = dna_profile['complexity_score']
+            conflicts = dna_profile['personality_conflicts']
+            
+            if effectiveness > 0.8 and complexity < 6 and conflicts == 0:
+                health_status = "Excellent"
+            elif effectiveness > 0.7 and complexity < 7:
+                health_status = "Healthy"
+            elif effectiveness < 0.4 or complexity > 8 or conflicts > 2:
+                health_status = "Problematic"
+            else:
+                health_status = "Needs Optimization"
+            
+            # Prepare properties for update
+            properties = {
+                "DNA Hash": {
+                    "rich_text": [{"text": {"content": dna_profile['content_hash']}}]
+                },
+                "Complexity Score": {
+                    "number": round(dna_profile['complexity_score'], 2)
+                },
+                "Effectiveness Score": {
+                    "number": round(dna_profile['effectiveness_score'], 3)
+                },
+                "Personality Mix": {
+                    "rich_text": [{"text": {"content": json.dumps(dna_profile['personality_ratios'])}}]
+                },
+                "Analysis Date": {
+                    "date": {"start": datetime.now().strftime('%Y-%m-%d')}
+                },
+                "Health Status": {
+                    "select": {"name": health_status}
+                },
+                "Viral Coefficient": {
+                    "number": round(dna_profile['viral_potential']['viral_coefficient'], 3)
+                }
+            }
+            
+            # Update the page with analysis results
+            self.notion.pages.update(
+                page_id=existing_record['id'],
+                properties=properties
+            )
+            
+            print(f"✅ Stored analysis results for: {prompt_id}")
+            print(f"   Health Status: {health_status}")
+            print(f"   DNA Hash: {dna_profile['content_hash']}")
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error storing analysis results: {e}")
+            return False
+    
+    # ═══════════════════════════════════════════════════════════════
+    # ENHANCED SETUP METHOD (MATCHING DB CHECKER SCHEMA)
+    # ═══════════════════════════════════════════════════════════════
+    
+    def setup_database(self):
+        """
+        ENHANCED: Creates or updates database schema to match DB checker expectations
+        Now includes ALL archaeological analysis fields
+        """
+        # First check if we can access the database
+        try:
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            print(f"Found existing database: {db['title'][0]['plain_text'] if db.get('title') else 'Untitled'}")
+            
+            # Check title property
+            title_found = False
+            for prop_name, prop in db['properties'].items():
+                if prop['type'] == 'title':
+                    title_found = True
+                    if prop_name != "Prompt ID":
+                        print(f"Warning: Title property is named '{prop_name}' instead of 'Prompt ID'")
+                        print("Note: Title properties cannot be renamed through the API")
+                    break
+                    
+            if not title_found:
+                print("❌ Error: Database doesn't have a title property")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error accessing database: {e}")
+            print("Please check your PROMPT_SECURITY_TOKEN and PROMPT_DATABASE_ID")
+            return False
+        
+        # Build complete properties from schema
+        new_properties = {}
+        
+        for prop_name, prop_config in self.expected_schema.items():
+            if prop_name == "Prompt ID":  # Skip title property
+                continue
+                
+            prop_definition = {"type": prop_config['type']}
+            
+            if prop_config['type'] == 'select':
+                prop_definition['select'] = {"options": prop_config.get('options', [])}
+            elif prop_config['type'] == 'multi_select':
+                prop_definition['multi_select'] = {"options": prop_config.get('options', [])}
+            elif prop_config['type'] == 'number':
+                prop_definition['number'] = {"format": "number"}
+            elif prop_config['type'] == 'rich_text':
+                prop_definition['rich_text'] = {}
+            elif prop_config['type'] == 'date':
+                prop_definition['date'] = {}
+            elif prop_config['type'] == 'relation':
+                prop_definition['relation'] = {
+                    "database_id": self.database_id,
+                    "single_property": {}
+                }
+            
+            new_properties[prop_name] = prop_definition
+        
+        try:
+            print("🔍 Setting up complete archaeological database schema...")
+            
+            # Get current properties 
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            current_properties = db.get('properties', {})
+            
+            # Add only properties that don't exist yet
+            properties_to_add = {}
+            for prop_name, prop_config in new_properties.items():
+                if prop_name not in current_properties:
+                    properties_to_add[prop_name] = prop_config
+                    print(f"Adding property: {prop_name}")
+            
+            if not properties_to_add:
+                print("✅ All required properties already exist!")
+                print("🔬 Database is ready for full archaeological analysis!")
+                return True
+                
+            # Update the database with new properties
+            response = self.notion.databases.update(
+                database_id=self.database_id,
+                properties=properties_to_add
+            )
+            
+            print("✅ Database schema updated successfully!")
+            print(f"Database: {response['title'][0]['plain_text'] if response.get('title') else 'Untitled'}")
+            print(f"Total properties: {len(response['properties'])}")
+            print("🔬 Ready for full archaeological DNA analysis!")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error updating database: {e}")
+            return False
+    
+    # ═══════════════════════════════════════════════════════════════
+    # ENHANCED HEALTH CHECK (MATCHING CLI EXPECTATIONS)
+    # ═══════════════════════════════════════════════════════════════
+    
+    def health_check_all_prompts(self) -> Dict[str, Any]:
+        """
+        ENHANCED: Comprehensive health check matching CLI expectations
+        Now provides detailed analysis and categorization
+        """
+        print("🔍 Performing comprehensive health check on all prompts...")
+        
+        try:
+            all_prompts = self.list_prompts()
+            health_report = {
+                'total_prompts': len(all_prompts),
+                'healthy_prompts': 0,
+                'problematic_prompts': 0,
+                'optimization_needed': 0,
+                'unanalyzed_prompts': 0,
+                'issues_found': [],
+                'recommendations': [],
+                'analysis_coverage': 0.0,
+                'average_effectiveness': 0.0,
+                'average_complexity': 0.0
+            }
+            
+            total_effectiveness = 0.0
+            total_complexity = 0.0
+            analyzed_count = 0
+            
+            for prompt in all_prompts:
+                prompt_id = prompt['Prompt ID']
+                
+                # Check if prompt has been analyzed
+                prompt_data = self.read_prompt(prompt_id, include_analysis=True)
+                
+                if not prompt_data or not prompt_data.get('DNA Hash'):
+                    # Prompt hasn't been analyzed yet
+                    health_report['unanalyzed_prompts'] += 1
+                    health_report['issues_found'].append({
+                        'prompt_id': prompt_id,
+                        'issue': 'No archaeological analysis performed',
+                        'recommendation': 'Run DNA analysis'
+                    })
+                    continue
+                
+                try:
+                    # Extract analysis data from Notion
+                    effectiveness = float(prompt_data.get('Effectiveness Score', 0))
+                    complexity = float(prompt_data.get('Complexity Score', 0))
+                    health_status = prompt_data.get('Health Status', 'Unanalyzed')
+                    
+                    total_effectiveness += effectiveness
+                    total_complexity += complexity
+                    analyzed_count += 1
+                    
+                    # Categorize based on health status stored in database
+                    if health_status in ['Excellent', 'Healthy']:
+                        health_report['healthy_prompts'] += 1
+                    elif health_status == 'Problematic':
+                        health_report['problematic_prompts'] += 1
+                        health_report['issues_found'].append({
+                            'prompt_id': prompt_id,
+                            'effectiveness': effectiveness,
+                            'complexity': complexity,
+                            'health_status': health_status,
+                            'issue': 'Marked as problematic in database'
+                        })
+                    else:  # Needs Optimization
+                        health_report['optimization_needed'] += 1
+                        
+                except Exception as e:
+                    health_report['issues_found'].append({
+                        'prompt_id': prompt_id,
+                        'error': f'Analysis data parsing error: {str(e)}'
+                    })
+            
+            # Calculate averages and coverage
+            if analyzed_count > 0:
+                health_report['average_effectiveness'] = total_effectiveness / analyzed_count
+                health_report['average_complexity'] = total_complexity / analyzed_count
+                health_report['analysis_coverage'] = analyzed_count / len(all_prompts)
+            
+            # Generate enhanced recommendations
+            if health_report['unanalyzed_prompts'] > 0:
+                health_report['recommendations'].append(
+                    f"🔬 URGENT: {health_report['unanalyzed_prompts']} prompts need archaeological analysis"
+                )
+            
+            if health_report['problematic_prompts'] > health_report['healthy_prompts']:
+                health_report['recommendations'].append("🚨 CRITICAL: More problematic prompts than healthy ones")
+            
+            if health_report['analysis_coverage'] < 0.8:
+                health_report['recommendations'].append("📊 LOW COVERAGE: Less than 80% of prompts analyzed")
+            
+            if health_report['average_effectiveness'] < 0.6:
+                health_report['recommendations'].append("📈 EFFECTIVENESS: System-wide optimization needed")
+            
+            if health_report['average_complexity'] > 7:
+                health_report['recommendations'].append("🔧 COMPLEXITY: Many prompts are overly complex")
+            
+            if not health_report['recommendations']:
+                health_report['recommendations'].append("✨ EXCELLENT: All prompts are in good archaeological health!")
+            
+            return health_report
+            
+        except Exception as e:
+            return {'error': f"Health check failed: {e}"}
+    
+    # ═══════════════════════════════════════════════════════════════
+    # ENHANCED READ METHOD (INCLUDES ANALYSIS DATA)
+    # ═══════════════════════════════════════════════════════════════
+    
+    def read_prompt(self, prompt_id, include_analysis=False):
+        """
+        ENHANCED: Retrieve prompt with optional analysis data
+        Now includes archaeological analysis fields when requested
+        """
+        try:
+            # Get the database to determine the title property name
+            db = self.notion.databases.retrieve(database_id=self.database_id)
+            title_property_name = None
+            
+            # Find the title property
+            for prop_name, prop in db['properties'].items():
+                if prop['type'] == 'title':
+                    title_property_name = prop_name
+                    break
+            
+            if not title_property_name:
+                print("❌ Error: No title property found in the database")
+                return False
+            
+            # Query the database for the prompt
+            response = self.notion.databases.query(
+                database_id=self.database_id,
+                filter={
+                    "property": title_property_name,
+                    "title": {
+                        "equals": prompt_id
+                    }
+                }
+            )
+            
+            if not response['results']:
+                print(f"❌ Prompt not found: {prompt_id}")
+                return None
+                
+            page = response['results'][0]
+            
+            # Extract basic data
+            extracted_data = {
+                "id": page['id'],
+                "Prompt ID": self._extract_text_property(page, title_property_name),
+                "Full Prompt": self._extract_text_property(page, 'Full Prompt'),
+                "Version": self._extract_text_property(page, 'Version'),
+                "Type": self._extract_select_property(page, 'Type'),
+                "Purpose": self._extract_text_property(page, 'Purpose')
+            }
+            
+            # Include analysis data if requested
+            if include_analysis:
+                extracted_data.update({
+                    "DNA Hash": self._extract_text_property(page, 'DNA Hash'),
+                    "Complexity Score": self._extract_number_property(page, 'Complexity Score'),
+                    "Effectiveness Score": self._extract_number_property(page, 'Effectiveness Score'),
+                    "Personality Mix": self._extract_text_property(page, 'Personality Mix'),
+                    "Analysis Date": self._extract_date_property(page, 'Analysis Date'),
+                    "Health Status": self._extract_select_property(page, 'Health Status'),
+                    "Viral Coefficient": self._extract_number_property(page, 'Viral Coefficient')
+                })
+            
+            print(f"✅ Retrieved prompt: {prompt_id}")
+            return extracted_data
+            
+        except Exception as e:
+            print(f"❌ Error reading prompt: {e}")
+            return None
+    
+    def _extract_text_property(self, page, prop_name):
+        """Helper to safely extract rich text properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            if prop.get('rich_text') and len(prop['rich_text']) > 0:
+                return prop['rich_text'][0]['plain_text']
+            return ""
+        except:
+            return ""
+    
+    def _extract_select_property(self, page, prop_name):
+        """Helper to safely extract select properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            if prop.get('select'):
+                return prop['select']['name']
+            return ""
+        except:
+            return ""
+    
+    def _extract_number_property(self, page, prop_name):
+        """Helper to safely extract number properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            return prop.get('number', 0)
+        except:
+            return 0
+    
+    def _extract_date_property(self, page, prop_name):
+        """Helper to safely extract date properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            if prop.get('date'):
+                return prop['date']['start']
+            return ""
+        except:
+            return ""
+    
+    # ═══════════════════════════════════════════════════════════════
+    # KEEP ALL EXISTING METHODS (DNA analysis, etc.)
+    # ═══════════════════════════════════════════════════════════════
     
     def _generate_content_hash(self, prompt_text: str) -> str:
         """Generate unique hash for prompt content"""
@@ -298,7 +884,7 @@ Personality Conflicts: {dna_profile['personality_conflicts']} detected
                 bar = '█' * bar_length + '░' * (20 - bar_length)
                 report += f"  {trait.title():<12}: {ratio:.1%} |{bar}|\n"
         
-        # Add Sherlock-style deductive analysis
+        # Add deductive analysis
         report += f"\n🕵️ DEDUCTIVE ANALYSIS:\n"
         
         if dna_profile['complexity_score'] > 7:
@@ -309,28 +895,11 @@ Personality Conflicts: {dna_profile['personality_conflicts']} detected
         elif dna_profile['effectiveness_score'] < 0.4:
             report += f"  • {self._get_analysis_phrase('sherlock')} - significant optimization needed.\n"
         
-        if dna_profile['personality_conflicts'] > 2:
-            report += f"  • Multiple personality conflicts detected - prompt needs therapy.\n"
-        
         # Add viral potential
         viral_coeff = dna_profile['viral_potential']['viral_coefficient']
         report += f"\n🦠 VIRAL POTENTIAL:\n"
         report += f"  Viral Coefficient: {viral_coeff:.2f}/1.0\n"
         report += f"  Meme Potential: {'High' if viral_coeff > 0.7 else 'Moderate' if viral_coeff > 0.4 else 'Low'}\n"
-        
-        # Add evolutionary fitness assessment
-        report += f"\n📈 EVOLUTIONARY FITNESS:\n"
-        report += f"  Survival Probability: {dna_profile['effectiveness_score']:.1%}\n"
-        report += f"  Replication Potential: {'High' if dna_profile['effectiveness_score'] > 0.7 else 'Moderate' if dna_profile['effectiveness_score'] > 0.4 else 'Low'}\n"
-        
-        # Add instruction structure analysis
-        struct = dna_profile['instruction_analysis']
-        report += f"\n🏗️ STRUCTURAL ANALYSIS:\n"
-        report += f"  System Instructions: {'✓' if struct['has_system_instruction'] else '✗'}\n"
-        report += f"  Examples Provided: {'✓' if struct['has_examples'] else '✗'}\n"
-        report += f"  Clear Constraints: {'✓' if struct['has_constraints'] else '✗'}\n"
-        report += f"  Output Format: {'✓' if struct['has_output_format'] else '✗'}\n"
-        report += f"  Personality Definition: {'✓' if struct['has_personality_definition'] else '✗'}\n"
         
         return report
     
@@ -380,347 +949,18 @@ Personality Conflicts: {dna_profile['personality_conflicts']} detected
         return suggestions
     
     def trace_prompt_lineage(self, prompt_id: str) -> Dict[str, Any]:
-        """Build family tree using existing Parent Prompt relations in Notion"""
-        print(f"🔍 Tracing lineage for: {prompt_id}")
-        
-        try:
-            # Get all prompts to build family tree
-            all_prompts = self.list_prompts()
-            
-            # Build parent-child relationships
-            lineage = {
-                'prompt_id': prompt_id,
-                'ancestors': [],
-                'descendants': [],
-                'generation': 0,
-                'family_tree': {}
-            }
-            
-            # Find ancestors (parents, grandparents, etc.)
-            current_prompt = prompt_id
-            generation = 0
-            
-            while current_prompt and generation < 10:  # Prevent infinite loops
-                # Find prompt with this ID
-                prompt_data = next((p for p in all_prompts if p['Prompt ID'] == current_prompt), None)
-                if not prompt_data:
-                    break
-                
-                # Check if it has a parent
-                # Note: Parent Prompt would be a relation field in Notion
-                # For now, we'll parse it from the prompt content or metadata
-                parent_id = self._extract_parent_from_prompt(current_prompt)
-                
-                if parent_id:
-                    lineage['ancestors'].append({
-                        'prompt_id': parent_id,
-                        'generation': generation + 1
-                    })
-                    current_prompt = parent_id
-                    generation += 1
-                else:
-                    break
-            
-            # Find descendants (children, grandchildren, etc.)
-            descendants = self._find_descendants(prompt_id, all_prompts)
-            lineage['descendants'] = descendants
-            
-            return lineage
-            
-        except Exception as e:
-            print(f"❌ Error tracing lineage: {e}")
-            return {'prompt_id': prompt_id, 'error': str(e)}
-    
-    def _extract_parent_from_prompt(self, prompt_id: str) -> Optional[str]:
-        """Extract parent prompt ID from prompt content or metadata"""
-        # This would need to be implemented based on how parent relationships are stored
-        # For now, return None - this would be enhanced based on actual Notion schema
-        return None
-    
-    def _find_descendants(self, prompt_id: str, all_prompts: List[Dict]) -> List[Dict]:
-        """Find all descendants of a prompt"""
-        descendants = []
-        # This would need to be implemented based on how parent relationships are stored
-        # For now, return empty list
-        return descendants
-    
-    def health_check_all_prompts(self) -> Dict[str, Any]:
-        """Perform health check on all prompts in the database"""
-        print("🔍 Performing health check on all prompts...")
-        
-        try:
-            all_prompts = self.list_prompts()
-            health_report = {
-                'total_prompts': len(all_prompts),
-                'healthy_prompts': 0,
-                'problematic_prompts': 0,
-                'optimization_needed': 0,
-                'issues_found': [],
-                'recommendations': []
-            }
-            
-            for prompt in all_prompts:
-                prompt_id = prompt['Prompt ID']
-                
-                # Analyze each prompt
-                try:
-                    dna_profile = self.analyze_prompt_dna(prompt_id)
-                    if dna_profile:
-                        # Categorize based on effectiveness and complexity
-                        if dna_profile['effectiveness_score'] > 0.7 and dna_profile['complexity_score'] < 7:
-                            health_report['healthy_prompts'] += 1
-                        elif dna_profile['effectiveness_score'] < 0.4 or dna_profile['complexity_score'] > 8:
-                            health_report['problematic_prompts'] += 1
-                            health_report['issues_found'].append({
-                                'prompt_id': prompt_id,
-                                'effectiveness': dna_profile['effectiveness_score'],
-                                'complexity': dna_profile['complexity_score'],
-                                'conflicts': dna_profile['personality_conflicts']
-                            })
-                        else:
-                            health_report['optimization_needed'] += 1
-                            
-                except Exception as e:
-                    health_report['issues_found'].append({
-                        'prompt_id': prompt_id,
-                        'error': str(e)
-                    })
-            
-            # Generate overall recommendations
-            if health_report['problematic_prompts'] > 0:
-                health_report['recommendations'].append("🚨 Urgent: Several prompts need immediate optimization")
-            
-            if health_report['optimization_needed'] > health_report['healthy_prompts']:
-                health_report['recommendations'].append("🔧 Consider systematic prompt optimization review")
-            
-            if health_report['healthy_prompts'] == health_report['total_prompts']:
-                health_report['recommendations'].append("✨ Excellent! All prompts are in good health")
-            
-            return health_report
-            
-        except Exception as e:
-            return {'error': f"Health check failed: {e}"}
-    
-    # ═══════════════════════════════════════════════════════════════
-    # EXISTING METHODS (Keep all your original functionality)
-    # ═══════════════════════════════════════════════════════════════
-    
-    def setup_database(self):
-        """Creates or updates the prompt library database schema."""
-        # First check if we can access the database
-        try:
-            db = self.notion.databases.retrieve(database_id=self.database_id)
-            print(f"Found existing database: {db['title'][0]['plain_text'] if db.get('title') else 'Untitled'}")
-            
-            # Check if title property exists and is named correctly
-            title_found = False
-            for prop_name, prop in db['properties'].items():
-                if prop['type'] == 'title':
-                    title_found = True
-                    if prop_name != "Prompt ID":
-                        print(f"Warning: Title property is named '{prop_name}' instead of 'Prompt ID'")
-                        print("Note: Title properties cannot be renamed through the API")
-                    break
-                    
-            if not title_found:
-                print("❌ Error: Database doesn't have a title property")
-                return False
-                
-        except Exception as e:
-            print(f"❌ Error accessing database: {e}")
-            print("Please check your PROMPT_SECURITY_TOKEN and PROMPT_DATABASE_ID")
-            return False
-            
-        # Define new properties to add (including archaeological analysis fields)
-        new_properties = {
-            "Version": {
-                "type": "rich_text",
-                "rich_text": {}
-            },
-            "Type": {
-                "type": "select",
-                "select": {
-                    "options": [
-                        {"name": "meta", "color": "red"},
-                        {"name": "consultation", "color": "blue"},
-                        {"name": "workshop", "color": "green"},
-                        {"name": "analysis", "color": "yellow"},
-                        {"name": "creation", "color": "purple"},
-                        {"name": "viral", "color": "orange"},
-                        {"name": "coding-companion", "color": "pink"}
-                    ]
-                }
-            },
-            "Purpose": {
-                "type": "rich_text",
-                "rich_text": {}
-            },
-            "Core Message": {
-                "type": "rich_text", 
-                "rich_text": {}
-            },
-            "Viral Hooks": {
-                "type": "multi_select",
-                "multi_select": {
-                    "options": [
-                        {"name": "Schrödinger's Agile", "color": "blue"},
-                        {"name": "Complexity Whisperer", "color": "green"},
-                        {"name": "AI Act Navigator", "color": "orange"},
-                        {"name": "Meme Machine", "color": "red"}
-                    ]
-                }
-            },
-            "Models": {
-                "type": "multi_select",
-                "multi_select": {
-                    "options": [
-                        {"name": "GPT-4", "color": "green"},
-                        {"name": "Claude 3", "color": "blue"},
-                        {"name": "Claude 3.7 Sonnet", "color": "purple"},
-                        {"name": "Perplexity", "color": "yellow"},
-                        {"name": "Grok 3", "color": "orange"},
-                        {"name": "Gemini 2.5 Pro", "color": "pink"}
-                    ]
-                }
-            },
-            "Creation Date": {
-                "type": "date",
-                "date": {}
-            },
-            "Last Modified": {
-                "type": "date",
-                "date": {}
-            },
-            "Parent Prompt": {
-                "type": "relation",
-                "relation": {
-                    "database_id": self.database_id,
-                    "single_property": {}
-                }
-            },
-            "Temperature": {
-                "type": "number",
-                "number": {"format": "number"}
-            },
-            "Personality Intensity": {
-                "type": "select",
-                "select": {
-                    "options": [
-                        {"name": "40%", "color": "gray"},
-                        {"name": "50%", "color": "blue"},
-                        {"name": "60%", "color": "green"},
-                        {"name": "70%", "color": "yellow"},
-                        {"name": "80%", "color": "red"}
-                    ]
-                }
-            },
-            "Security Level": {
-                "type": "select",
-                "select": {
-                    "options": [
-                        {"name": "public", "color": "green"},
-                        {"name": "client", "color": "blue"},
-                        {"name": "private", "color": "orange"},
-                        {"name": "classified", "color": "red"}
-                    ]
-                }
-            },
-            "Full Prompt": {
-                "type": "rich_text",
-                "rich_text": {}
-            },
-            "Usage Contexts": {
-                "type": "multi_select",
-                "multi_select": {
-                    "options": [
-                        {"name": "EU AI Act", "color": "blue"},
-                        {"name": "Workshops", "color": "green"},
-                        {"name": "Coding", "color": "purple"},
-                        {"name": "Sales", "color": "yellow"},
-                        {"name": "Content Creation", "color": "orange"}
-                    ]
-                }
-            },
-            "Tags": {
-                "type": "multi_select",
-                "multi_select": {
-                    "options": []  # Will be populated dynamically
-                }
-            },
-            "Generation": {
-                "type": "number",
-                "number": {"format": "number"}
-            },
-            # NEW ARCHAEOLOGICAL ANALYSIS FIELDS
-            "DNA Hash": {
-                "type": "rich_text",
-                "rich_text": {}
-            },
-            "Complexity Score": {
-                "type": "number",
-                "number": {"format": "number"}
-            },
-            "Effectiveness Score": {
-                "type": "number",
-                "number": {"format": "number"}
-            },
-            "Personality Mix": {
-                "type": "rich_text",
-                "rich_text": {}
-            },
-            "Analysis Date": {
-                "type": "date",
-                "date": {}
-            },
-            "Health Status": {
-                "type": "select",
-                "select": {
-                    "options": [
-                        {"name": "Healthy", "color": "green"},
-                        {"name": "Needs Optimization", "color": "yellow"},
-                        {"name": "Problematic", "color": "red"},
-                        {"name": "Excellent", "color": "blue"}
-                    ]
-                }
-            },
-            "Viral Coefficient": {
-                "type": "number",
-                "number": {"format": "number"}
-            }
+        """Trace prompt family tree - basic implementation for now"""
+        return {
+            'prompt_id': prompt_id,
+            'ancestors': [],
+            'descendants': [],
+            'generation': 0,
+            'note': 'Full lineage tracing requires enhanced parent-child relationship implementation'
         }
-        
-        try:
-            print("🔍 Setting up prompt library database schema...")
-            
-            # Get current properties 
-            db = self.notion.databases.retrieve(database_id=self.database_id)
-            current_properties = db.get('properties', {})
-            
-            # Add only properties that don't exist yet
-            properties_to_add = {}
-            for prop_name, prop_config in new_properties.items():
-                if prop_name not in current_properties:
-                    properties_to_add[prop_name] = prop_config
-                    print(f"Adding property: {prop_name}")
-            
-            if not properties_to_add:
-                print("✅ All required properties already exist!")
-                return True
-                
-            # Update the database with new properties
-            response = self.notion.databases.update(
-                database_id=self.database_id,
-                properties=properties_to_add
-            )
-            
-            print("✅ Database schema updated successfully!")
-            print(f"Database: {response['title'][0]['plain_text'] if response.get('title') else 'Untitled'}")
-            print(f"Total properties: {len(response['properties'])}")
-            return True
-            
-        except Exception as e:
-            print(f"❌ Error updating database: {e}")
-            return False
+    
+    # ═══════════════════════════════════════════════════════════════
+    # ESSENTIAL CRUD METHODS (RESTORED FROM ORIGINAL)
+    # ═══════════════════════════════════════════════════════════════
     
     def parse_prompt_file(self, file_path):
         """Parse a prompt file into structured data."""
@@ -847,54 +1087,6 @@ Personality Conflicts: {dna_profile['personality_conflicts']} detected
         except Exception as e:
             print(f"❌ Error creating prompt: {e}")
             return False
-    
-    def read_prompt(self, prompt_id):
-        """Retrieve a prompt from the database by ID."""
-        try:
-            # Get the database to determine the title property name
-            db = self.notion.databases.retrieve(database_id=self.database_id)
-            title_property_name = None
-            
-            # Find the title property
-            for prop_name, prop in db['properties'].items():
-                if prop['type'] == 'title':
-                    title_property_name = prop_name
-                    break
-            
-            if not title_property_name:
-                print("❌ Error: No title property found in the database")
-                return False
-            
-            # Query the database for the prompt
-            response = self.notion.databases.query(
-                database_id=self.database_id,
-                filter={
-                    "property": title_property_name,
-                    "title": {
-                        "equals": prompt_id
-                    }
-                }
-            )
-            
-            if not response['results']:
-                print(f"❌ Prompt not found: {prompt_id}")
-                return None
-                
-            page = response['results'][0]
-            
-            # Extract data from the page
-            extracted_data = {
-                "id": page['id'],
-                "Prompt ID": page['properties'][title_property_name]['title'][0]['plain_text'] if page['properties'][title_property_name]['title'] else "",
-                "Full Prompt": page['properties']['Full Prompt']['rich_text'][0]['plain_text'] if page['properties']['Full Prompt']['rich_text'] else ""
-            }
-            
-            print(f"✅ Retrieved prompt: {prompt_id}")
-            return extracted_data
-            
-        except Exception as e:
-            print(f"❌ Error reading prompt: {e}")
-            return None
     
     def update_prompt(self, prompt_id, file_path=None, prompt_data=None):
         """Update an existing prompt in the database."""
@@ -1070,13 +1262,13 @@ Personality Conflicts: {dna_profile['personality_conflicts']} detected
             return []
 
 if __name__ == "__main__":
-    # Example usage
+    # Example usage with enhanced capabilities
     manager = PromptManager()
     
-    # Example archaeological analysis
-    # dna_profile = manager.analyze_prompt_dna("khaos-core-persona")
-    # if dna_profile:
-    #     print(manager.generate_analysis_report(dna_profile))
-    #     suggestions = manager.generate_optimization_suggestions(dna_profile)
-    #     for suggestion in suggestions:
-    #         print(suggestion)
+    # Test the enhanced archaeological analysis
+    print("🧬 Testing enhanced archaeological capabilities...")
+    
+    # This would now automatically store results in database
+    dna_profile = manager.analyze_prompt_dna("khaos-core-persona")
+    if dna_profile:
+        print(manager.generate_analysis_report(dna_profile))
