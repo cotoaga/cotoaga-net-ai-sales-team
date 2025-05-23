@@ -91,6 +91,11 @@ def main():
     stats_parser = subparsers.add_parser("stats", help="📊 Show prompt database statistics")
     stats_parser.add_argument("--breakdown", help="Break down by field (type, effectiveness, complexity)", default=None)
     
+    # Schema command - Show database schema/properties
+    schema_parser = subparsers.add_parser("schema", help="🏗️ Show database schema and properties")
+    schema_parser.add_argument("--detailed", "-d", action="store_true", help="Show detailed property information")
+    schema_parser.add_argument("--type", help="Filter by property type (select, rich_text, number, etc.)", default=None)
+    
     # Evolve command - Create evolved version of existing prompt
     evolve_parser = subparsers.add_parser("evolve", help="🧬 Create evolved version of existing prompt")
     evolve_parser.add_argument("prompt_id", help="ID of the prompt to evolve")
@@ -474,6 +479,118 @@ def main():
             print(f"\n🔬 ANALYSIS BREAKDOWN:")
             print(f"(Advanced statistics require running analysis on all prompts first)")
             print(f"Try: python prompt_cli.py health-check --detailed")
+    
+    elif args.command == "schema":
+        print("🏗️ Database Schema & Properties")
+        print("=" * 60)
+        
+        try:
+            # Get database schema
+            db = manager.notion.databases.retrieve(database_id=manager.database_id)
+            properties = db.get('properties', {})
+            
+            if not properties:
+                print("❌ No properties found in database")
+                return
+            
+            # Filter by type if specified
+            if args.type:
+                filtered_properties = {name: prop for name, prop in properties.items() 
+                                     if prop['type'] == args.type}
+                if not filtered_properties:
+                    print(f"❌ No properties found with type: {args.type}")
+                    return
+                properties = filtered_properties
+                print(f"Showing properties of type: {args.type}")
+            
+            # Group properties by type
+            prop_by_type = {}
+            for name, prop in properties.items():
+                prop_type = prop['type']
+                if prop_type not in prop_by_type:
+                    prop_by_type[prop_type] = []
+                prop_by_type[prop_type].append((name, prop))
+            
+            print(f"📊 Total Properties: {len(properties)}")
+            print(f"📊 Property Types: {len(prop_by_type)}")
+            print()
+            
+            # Display by type
+            type_order = ['title', 'rich_text', 'select', 'multi_select', 'number', 'date', 'relation']
+            
+            for prop_type in type_order + [t for t in prop_by_type.keys() if t not in type_order]:
+                if prop_type not in prop_by_type:
+                    continue
+                    
+                type_props = prop_by_type[prop_type]
+                type_emoji = {
+                    'title': '🏷️',
+                    'rich_text': '📝',
+                    'select': '🎯',
+                    'multi_select': '🏷️',
+                    'number': '🔢',
+                    'date': '📅',
+                    'relation': '🔗',
+                    'checkbox': '☑️',
+                    'url': '🌐',
+                    'email': '📧',
+                    'phone_number': '📞'
+                }.get(prop_type, '❓')
+                
+                print(f"{type_emoji} {prop_type.upper()} PROPERTIES ({len(type_props)}):")
+                print("-" * 40)
+                
+                for name, prop in sorted(type_props):
+                    if args.detailed:
+                        print(f"  📋 {name}")
+                        
+                        if prop_type == 'select' and 'select' in prop:
+                            options = prop['select'].get('options', [])
+                            if options:
+                                print(f"     Options: {', '.join([opt['name'] for opt in options[:5]])}")
+                                if len(options) > 5:
+                                    print(f"              ... and {len(options) - 5} more")
+                        
+                        elif prop_type == 'multi_select' and 'multi_select' in prop:
+                            options = prop['multi_select'].get('options', [])
+                            if options:
+                                print(f"     Options: {', '.join([opt['name'] for opt in options[:5]])}")
+                                if len(options) > 5:
+                                    print(f"              ... and {len(options) - 5} more")
+                        
+                        elif prop_type == 'relation' and 'relation' in prop:
+                            rel_db = prop['relation'].get('database_id', 'Unknown')
+                            print(f"     Related DB: {rel_db[:8]}...")
+                        
+                        elif prop_type == 'number' and 'number' in prop:
+                            format_type = prop['number'].get('format', 'number')
+                            print(f"     Format: {format_type}")
+                        
+                        print()
+                    else:
+                        # Simple format
+                        extra_info = ""
+                        if prop_type == 'select' and 'select' in prop:
+                            option_count = len(prop['select'].get('options', []))
+                            extra_info = f" ({option_count} options)"
+                        elif prop_type == 'multi_select' and 'multi_select' in prop:
+                            option_count = len(prop['multi_select'].get('options', []))
+                            extra_info = f" ({option_count} options)"
+                        
+                        print(f"  • {name}{extra_info}")
+                
+                print()
+            
+            # Quick stats
+            print("📊 SCHEMA SUMMARY:")
+            print("-" * 20)
+            for prop_type, count in sorted([(t, len(props)) for t, props in prop_by_type.items()], 
+                                         key=lambda x: x[1], reverse=True):
+                bar = '█' * min(count, 15)
+                print(f"{prop_type:<12}: {count:>2} |{bar}")
+            
+        except Exception as e:
+            print(f"❌ Error retrieving schema: {e}")
     
     elif args.command == "evolve":
         print(f"🧬 Creating evolved version of: {args.prompt_id}")
