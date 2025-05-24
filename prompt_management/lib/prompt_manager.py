@@ -626,14 +626,26 @@ class PromptManager:
                 
             page = response['results'][0]
             
-            # Extract basic data
+            # Extract all content data for full prompt display
             extracted_data = {
                 "id": page['id'],
                 "Prompt ID": self._extract_text_property(page, title_property_name),
-                "Full Prompt": self._extract_text_property(page, 'Full Prompt'),
                 "Version": self._extract_text_property(page, 'Version'),
                 "Type": self._extract_select_property(page, 'Type'),
-                "Purpose": self._extract_text_property(page, 'Purpose')
+                "Purpose": self._extract_text_property(page, 'Purpose'),
+                "Context": self._extract_text_property(page, 'Context'),
+                "System Instructions": self._extract_text_property(page, 'System Instructions'),
+                "Instruction": self._extract_text_property(page, 'Instruction'),
+                "User Input Expectation": self._extract_text_property(page, 'User Input Expectation'),
+                "Output Format": self._extract_text_property(page, 'Output Format'),
+                "Few-Shot Examples": self._extract_text_property(page, 'Few-Shot Examples'),
+                "Notes": self._extract_text_property(page, 'Notes'),
+                "Author": self._extract_text_property(page, 'Author'),
+                "Language": self._extract_text_property(page, 'Language'),
+                "Execution Parameters": self._extract_text_property(page, 'Execution Parameters'),
+                "Personality Mix": self._extract_text_property(page, 'Personality Mix'),
+                "Parent Prompts": self._extract_text_property(page, 'Parent Prompts'),
+                "Full Prompt": self._extract_text_property(page, 'Full Prompt')
             }
             
             # Include analysis data if requested

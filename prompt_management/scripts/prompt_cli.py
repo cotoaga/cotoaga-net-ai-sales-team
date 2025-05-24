@@ -139,15 +139,20 @@ def main():
         prompt = manager.read_prompt(args.prompt_id)
         if prompt:
             if args.save:
+                # Generate full prompt content for saving
+                full_content = _generate_full_prompt_content(prompt)
                 with open(args.save, "w") as f:
-                    f.write(prompt["Full Prompt"])
+                    f.write(full_content)
                 print(f"💾 Prompt saved to: {args.save}")
             else:
-                print("\n" + "="*60)
-                print(f"PROMPT: {args.prompt_id}")
-                print("="*60)
-                print(prompt["Full Prompt"])
-                print("="*60)
+                print("\n" + "="*70)
+                print(f"🧬 PROMPT: {args.prompt_id} (v{prompt['Version']})")
+                print("="*70)
+                
+                # Display structured content
+                _display_prompt_content(prompt)
+                
+                print("="*70)
         
     elif args.command == "update":
         print(f"🔄 Updating prompt: {args.prompt_id}")
@@ -619,6 +624,128 @@ def main():
         parser.print_help()
         print("\n🔬 Pro tip: Start with 'list' to see your specimens,")
         print("   then 'analyze' to examine their DNA!")
+
+def _display_prompt_content(prompt):
+    """Display structured prompt content in a readable format"""
+    sections = [
+        ("📋 METADATA", [
+            ("Author", prompt.get('Author')),
+            ("Version", prompt.get('Version')),
+            ("Type", prompt.get('Type')),
+            ("Language", prompt.get('Language')),
+            ("Parent Prompts", prompt.get('Parent Prompts'))
+        ]),
+        ("🎯 PURPOSE", [
+            ("Purpose", prompt.get('Purpose'))
+        ]),
+        ("🌍 CONTEXT", [
+            ("Context", prompt.get('Context'))
+        ]),
+        ("🤖 SYSTEM INSTRUCTIONS", [
+            ("System Instructions", prompt.get('System Instructions'))
+        ]),
+        ("📋 INSTRUCTION", [
+            ("Instruction", prompt.get('Instruction'))
+        ]),
+        ("📥 INPUT EXPECTATION", [
+            ("User Input Expectation", prompt.get('User Input Expectation'))
+        ]),
+        ("📤 OUTPUT FORMAT", [
+            ("Output Format", prompt.get('Output Format'))
+        ]),
+        ("🎯 EXAMPLES", [
+            ("Few-Shot Examples", prompt.get('Few-Shot Examples'))
+        ]),
+        ("⚙️ CONFIGURATION", [
+            ("Execution Parameters", prompt.get('Execution Parameters')),
+            ("Personality Mix", prompt.get('Personality Mix'))
+        ]),
+        ("📝 NOTES", [
+            ("Notes", prompt.get('Notes'))
+        ])
+    ]
+    
+    for section_title, fields in sections:
+        # Check if any fields in this section have content
+        has_content = any(field_value and field_value.strip() for _, field_value in fields)
+        if has_content:
+            print(f"\n{section_title}")
+            print("-" * 50)
+            for field_name, field_value in fields:
+                if field_value and field_value.strip():
+                    if len(field_value) > 200:
+                        # Format long content with proper wrapping
+                        print(f"{field_value}")
+                        print()
+                    else:
+                        print(f"{field_value}")
+                        print()
+
+def _generate_full_prompt_content(prompt):
+    """Generate full prompt content for saving to file"""
+    content_parts = []
+    
+    # Header
+    content_parts.append(f"PROMPT ID: {prompt.get('Prompt ID', '')}")
+    content_parts.append(f"VERSION: {prompt.get('Version', '')}")
+    content_parts.append(f"TYPE: {prompt.get('Type', '')}")
+    content_parts.append(f"AUTHOR: {prompt.get('Author', '')}")
+    content_parts.append(f"LANGUAGE: {prompt.get('Language', '')}")
+    content_parts.append(f"PARENT PROMPTS: {prompt.get('Parent Prompts', '')}")
+    content_parts.append("")
+    
+    # Core content sections
+    if prompt.get('Purpose'):
+        content_parts.append("PURPOSE:")
+        content_parts.append(prompt['Purpose'])
+        content_parts.append("")
+    
+    if prompt.get('Context'):
+        content_parts.append("CONTEXT:")
+        content_parts.append(prompt['Context'])
+        content_parts.append("")
+    
+    if prompt.get('System Instructions'):
+        content_parts.append("SYSTEM INSTRUCTIONS:")
+        content_parts.append(prompt['System Instructions'])
+        content_parts.append("")
+    
+    if prompt.get('Instruction'):
+        content_parts.append("INSTRUCTION:")
+        content_parts.append(prompt['Instruction'])
+        content_parts.append("")
+    
+    if prompt.get('User Input Expectation'):
+        content_parts.append("INPUT EXPECTATION:")
+        content_parts.append(prompt['User Input Expectation'])
+        content_parts.append("")
+    
+    if prompt.get('Output Format'):
+        content_parts.append("OUTPUT FORMAT:")
+        content_parts.append(prompt['Output Format'])
+        content_parts.append("")
+    
+    if prompt.get('Few-Shot Examples'):
+        content_parts.append("FEW-SHOT EXAMPLES:")
+        content_parts.append(prompt['Few-Shot Examples'])
+        content_parts.append("")
+    
+    if prompt.get('Execution Parameters'):
+        content_parts.append("EXECUTION PARAMETERS:")
+        content_parts.append(prompt['Execution Parameters'])
+        content_parts.append("")
+    
+    if prompt.get('Personality Mix'):
+        content_parts.append("PERSONALITY MIX:")
+        content_parts.append(prompt['Personality Mix'])
+        content_parts.append("")
+    
+    if prompt.get('Notes'):
+        content_parts.append("NOTES:")
+        content_parts.append(prompt['Notes'])
+        content_parts.append("")
+    
+    return "\n".join(content_parts)
 
 if __name__ == "__main__":
     main()
