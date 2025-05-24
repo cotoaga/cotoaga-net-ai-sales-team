@@ -287,7 +287,20 @@ class PromptManager:
             print(f"❌ Cannot analyze non-existent prompt: {prompt_id}")
             return None
         
-        prompt_text = prompt_data.get('Full Prompt', '')
+        # Combine all content fields for analysis (Full Prompt is empty, so build it)
+        content_parts = []
+        content_fields = [
+            'Purpose', 'Context', 'System Instructions', 'Instruction', 
+            'User Input Expectation', 'Output Format', 'Few-Shot Examples', 'Notes'
+        ]
+        
+        for field in content_fields:
+            field_content = prompt_data.get(field, '')
+            if field_content and field_content.strip():
+                content_parts.append(f"{field}: {field_content}")
+        
+        prompt_text = '\n\n'.join(content_parts)
+        
         if not prompt_text:
             print(f"❌ No prompt content found for: {prompt_id}")
             return None
