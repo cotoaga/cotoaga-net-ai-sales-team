@@ -206,23 +206,53 @@ def main():
     # ═══════════════════════════════════════════════════════════════
     
     elif args.command == "analyze":
-        print(f"🔬 Analyzing prompt DNA: {args.prompt_id}")
-        print("=" * 60)
+        print(f"🔬 ENHANCED ARCHAEOLOGICAL ANALYSIS: {args.prompt_id}")
+        print("=" * 70)
         
+        # First, get complete property data using our enhanced read method
+        print("📊 Phase 1: Complete Property Extraction...")
+        prompt_data = manager.read_prompt(args.prompt_id, include_all_properties=True)
+        
+        if not prompt_data:
+            print("❌ Analysis failed - prompt not found or inaccessible")
+            return
+        
+        # Display property population status
+        if '_metadata' in prompt_data:
+            meta = prompt_data['_metadata']
+            print(f"✅ Property Status: {meta['populated_properties']}/{meta['total_properties']} properties ({meta['population_percentage']:.1f}%)")
+        
+        # Phase 2: Perform DNA analysis
+        print("\n🧬 Phase 2: DNA Analysis...")
         dna_profile = manager.analyze_prompt_dna(args.prompt_id)
+        
         if dna_profile:
             # Generate and display the analysis report
             report = manager.generate_analysis_report(dna_profile)
             print(report)
             
             if args.verbose:
-                print("\n🔍 DETAILED ARCHAEOLOGICAL DATA:")
-                print("-" * 40)
+                print("\n🔍 ENHANCED ARCHAEOLOGICAL DATA:")
+                print("-" * 50)
                 print(f"Content Hash: {dna_profile['content_hash']}")
                 print(f"Token Count: {dna_profile['token_count']}")
                 print(f"Complexity Factors: {dna_profile['complexity_score']:.2f}")
                 print(f"Personality Conflicts: {dna_profile['personality_conflicts']}")
                 print(f"Viral Coefficient: {dna_profile['viral_potential']['viral_coefficient']:.2f}")
+                
+                # Show property completeness analysis
+                print(f"\n📊 PROPERTY COMPLETENESS ANALYSIS:")
+                core_properties = ['Purpose', 'System Instructions', 'Instruction', 'Output Format']
+                populated_core = sum(1 for prop in core_properties if prompt_data.get(prop) and prompt_data[prop].strip())
+                print(f"  Core Content Properties: {populated_core}/{len(core_properties)} populated")
+                
+                config_properties = ['Type', 'Models', 'Temperature', 'Security Level']
+                populated_config = sum(1 for prop in config_properties if prompt_data.get(prop))
+                print(f"  Configuration Properties: {populated_config}/{len(config_properties)} populated")
+                
+                analysis_properties = ['DNA Hash', 'Complexity Score', 'Effectiveness Score', 'Health Status']
+                populated_analysis = sum(1 for prop in analysis_properties if prompt_data.get(prop))
+                print(f"  Analysis Properties: {populated_analysis}/{len(analysis_properties)} populated")
                 
                 # Show instruction analysis
                 struct = dna_profile['instruction_analysis']
@@ -231,52 +261,144 @@ def main():
                 print(f"  Line Count: {struct['line_count']}")
                 print(f"  Section Count: {struct['section_count']}")
                 print(f"  Instruction Count: {struct['instruction_count']}")
+                
+                # Show missing critical properties
+                missing_critical = []
+                critical_props = ['Purpose', 'System Instructions', 'Type', 'Version']
+                for prop in critical_props:
+                    if not prompt_data.get(prop) or (isinstance(prompt_data[prop], str) and not prompt_data[prop].strip()):
+                        missing_critical.append(prop)
+                
+                if missing_critical:
+                    print(f"\n⚠️  MISSING CRITICAL PROPERTIES:")
+                    for prop in missing_critical:
+                        print(f"  • {prop}")
+                else:
+                    print(f"\n✅ All critical properties populated!")
             
-            # Save report if requested
+            # Save enhanced report if requested
             if args.save_report:
+                enhanced_report = report + f"\n\n📊 PROPERTY ANALYSIS:\n"
+                enhanced_report += f"Population: {meta['populated_properties']}/{meta['total_properties']} ({meta['population_percentage']:.1f}%)\n"
+                enhanced_report += f"Extraction Time: {meta['extraction_timestamp']}\n"
+                
                 with open(args.save_report, "w") as f:
-                    f.write(report)
-                print(f"\n💾 Analysis report saved to: {args.save_report}")
+                    f.write(enhanced_report)
+                print(f"\n💾 Enhanced analysis report saved to: {args.save_report}")
         else:
-            print("❌ Analysis failed - prompt not found or inaccessible")
+            print("❌ DNA analysis failed - unable to process prompt content")
     
     elif args.command == "health-check":
-        print("🏥 Performing system-wide health check...")
-        print("=" * 60)
+        print("🏥 ENHANCED SYSTEM-WIDE HEALTH CHECK")
+        print("=" * 70)
+        print("Leveraging complete 38-property database sovereignty...")
         
+        # Phase 1: Get all prompts with complete property data
+        print("\n📊 Phase 1: Complete Property Assessment...")
+        all_prompts = manager.list_prompts()
+        
+        if not all_prompts:
+            print("❌ No prompts found in database")
+            return
+        
+        # Enhanced health analysis with complete property awareness
+        total_prompts = len(all_prompts)
+        property_health = []
+        dna_health = []
+        
+        print(f"✅ Found {total_prompts} prompts for comprehensive analysis")
+        
+        # Phase 2: Detailed property and health analysis
+        print("\n🔬 Phase 2: Detailed Health Analysis...")
+        
+        for i, prompt_summary in enumerate(all_prompts, 1):
+            prompt_id = prompt_summary['Prompt ID']
+            print(f"  Analyzing {i}/{total_prompts}: {prompt_id}")
+            
+            # Get complete property data
+            prompt_data = manager.read_prompt(prompt_id, include_all_properties=True)
+            if prompt_data and '_metadata' in prompt_data:
+                property_health.append({
+                    'prompt_id': prompt_id,
+                    'populated_properties': prompt_data['_metadata']['populated_properties'],
+                    'population_percentage': prompt_data['_metadata']['population_percentage']
+                })
+        
+        # Phase 3: Traditional DNA health check
+        print("\n🧬 Phase 3: DNA Health Assessment...")
         health_report = manager.health_check_all_prompts()
         
         if 'error' in health_report:
-            print(f"❌ Health check failed: {health_report['error']}")
-        else:
-            # Display health summary with visual indicators
-            total = health_report['total_prompts']
-            healthy = health_report['healthy_prompts']
-            needs_opt = health_report['optimization_needed']
-            problematic = health_report['problematic_prompts']
+            print(f"❌ DNA health check failed: {health_report['error']}")
+            return
+        
+        # Enhanced health summary
+        print(f"\n📊 ENHANCED SYSTEM HEALTH SUMMARY:")
+        print(f"{'='*50}")
+        
+        # Property completeness analysis
+        if property_health:
+            avg_population = sum(p['population_percentage'] for p in property_health) / len(property_health)
+            fully_populated = sum(1 for p in property_health if p['population_percentage'] >= 95)
+            well_populated = sum(1 for p in property_health if p['population_percentage'] >= 80)
+            poorly_populated = sum(1 for p in property_health if p['population_percentage'] < 50)
             
-            print(f"📊 SYSTEM HEALTH SUMMARY:")
-            print(f"{'='*40}")
-            print(f"Total Prompts: {total}")
-            print(f"Healthy: {healthy} ✅ ({healthy/total*100:.1f}%)")
-            print(f"Need Optimization: {needs_opt} ⚠️  ({needs_opt/total*100:.1f}%)")
-            print(f"Problematic: {problematic} ❌ ({problematic/total*100:.1f}%)")
+            print(f"🏗️ PROPERTY COMPLETENESS:")
+            print(f"  Average Population: {avg_population:.1f}%")
+            print(f"  Fully Populated (≥95%): {fully_populated}/{total_prompts} ({fully_populated/total_prompts*100:.1f}%)")
+            print(f"  Well Populated (≥80%): {well_populated}/{total_prompts} ({well_populated/total_prompts*100:.1f}%)")
+            print(f"  Poorly Populated (<50%): {poorly_populated}/{total_prompts} ({poorly_populated/total_prompts*100:.1f}%)")
+        
+        # Traditional health metrics
+        total = health_report['total_prompts']
+        healthy = health_report['healthy_prompts']
+        needs_opt = health_report['optimization_needed']
+        problematic = health_report['problematic_prompts']
+        unanalyzed = health_report['unanalyzed_prompts']
+        
+        print(f"\n🧬 DNA HEALTH STATUS:")
+        print(f"  Total Prompts: {total}")
+        print(f"  Healthy: {healthy} ✅ ({healthy/total*100:.1f}%)")
+        print(f"  Need Optimization: {needs_opt} ⚠️  ({needs_opt/total*100:.1f}%)")
+        print(f"  Problematic: {problematic} ❌ ({problematic/total*100:.1f}%)")
+        print(f"  Unanalyzed: {unanalyzed} 🔍 ({unanalyzed/total*100:.1f}%)")
+        
+        # Enhanced health bar visualization
+        healthy_bar = '█' * max(1, int(healthy/total*30)) if total > 0 else ''
+        warning_bar = '▓' * max(1, int(needs_opt/total*30)) if total > 0 else ''
+        problem_bar = '▒' * max(1, int(problematic/total*30)) if total > 0 else ''
+        unanalyzed_bar = '░' * max(1, int(unanalyzed/total*30)) if total > 0 else ''
+        
+        print(f"\nHealth Visualization:")
+        print(f"  |{healthy_bar}{warning_bar}{problem_bar}{unanalyzed_bar}|")
+        print(f"  ✅ Healthy  ⚠️ Warning  ❌ Problem  🔍 Unanalyzed")
+        
+        # Enhanced recommendations
+        print(f"\n🎯 ENHANCED RECOMMENDATIONS:")
+        
+        if property_health:
+            if avg_population < 70:
+                print(f"  🏗️ PROPERTY COMPLETENESS: Average population is {avg_population:.1f}% - improve data entry")
+            if poorly_populated > 0:
+                print(f"  📝 DATA QUALITY: {poorly_populated} prompts are poorly populated (<50% properties)")
+        
+        if unanalyzed > total * 0.3:
+            print(f"  🔬 ANALYSIS COVERAGE: {unanalyzed} prompts need DNA analysis (>30% unanalyzed)")
+        
+        if health_report['recommendations']:
+            for rec in health_report['recommendations']:
+                print(f"  🧬 {rec}")
+        
+        # Show detailed issues if requested
+        if args.detailed:
+            if property_health:
+                print(f"\n🔍 DETAILED PROPERTY ANALYSIS:")
+                for p in sorted(property_health, key=lambda x: x['population_percentage']):
+                    status = "🔴" if p['population_percentage'] < 50 else "🟡" if p['population_percentage'] < 80 else "🟢"
+                    print(f"  {status} {p['prompt_id']}: {p['populated_properties']}/38 ({p['population_percentage']:.1f}%)")
             
-            # Health bar visualization
-            healthy_bar = '█' * int(healthy/total*20) if total > 0 else ''
-            warning_bar = '▓' * int(needs_opt/total*20) if total > 0 else ''
-            problem_bar = '░' * int(problematic/total*20) if total > 0 else ''
-            print(f"\nHealth Bar: |{healthy_bar}{warning_bar}{problem_bar}|")
-            
-            # Show recommendations
-            if health_report['recommendations']:
-                print(f"\n🎯 SYSTEM RECOMMENDATIONS:")
-                for rec in health_report['recommendations']:
-                    print(f"  • {rec}")
-            
-            # Show detailed issues if requested
-            if args.detailed and health_report['issues_found']:
-                print(f"\n🔍 DETAILED HEALTH ISSUES:")
+            if health_report['issues_found']:
+                print(f"\n🔍 DETAILED DNA HEALTH ISSUES:")
                 for issue in health_report['issues_found']:
                     if 'error' in issue:
                         print(f"  ❌ {issue['prompt_id']}: {issue['error']}")
@@ -284,14 +406,26 @@ def main():
                         print(f"  ⚠️  {issue['prompt_id']}:")
                         print(f"      Effectiveness: {issue.get('effectiveness', 'N/A')}")
                         print(f"      Complexity: {issue.get('complexity', 'N/A')}")
-                        print(f"      Conflicts: {issue.get('conflicts', 'N/A')}")
+                        print(f"      Health Status: {issue.get('health_status', 'N/A')}")
+        
+        # Save enhanced report if requested
+        if args.save_report:
+            import json
+            enhanced_report = {
+                **health_report,
+                'property_completeness': {
+                    'average_population': avg_population if property_health else 0,
+                    'property_details': property_health
+                },
+                'analysis_timestamp': datetime.now().isoformat()
+            }
             
-            # Save report if requested
-            if args.save_report:
-                import json
-                with open(args.save_report, "w") as f:
-                    json.dump(health_report, f, indent=2)
-                print(f"\n💾 Health report saved to: {args.save_report}")
+            with open(args.save_report, "w") as f:
+                json.dump(enhanced_report, f, indent=2)
+            print(f"\n💾 Enhanced health report saved to: {args.save_report}")
+        
+        print(f"\n🎉 Enhanced health check complete!")
+        print(f"📊 Database sovereignty: ✅ Complete access to all 38 properties")
     
     elif args.command == "optimize":
         print(f"⚡ Generating optimization suggestions for: {args.prompt_id}")

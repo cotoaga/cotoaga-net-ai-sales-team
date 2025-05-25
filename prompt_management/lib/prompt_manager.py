@@ -714,7 +714,7 @@ class PromptManager:
                 prompt_id = prompt['Prompt ID']
                 
                 # Check if prompt has been analyzed
-                prompt_data = self.read_prompt(prompt_id, include_analysis=True)
+                prompt_data = self.read_prompt(prompt_id, include_all_properties=True)
                 
                 if not prompt_data or not prompt_data.get('DNA Hash'):
                     # Prompt hasn't been analyzed yet
