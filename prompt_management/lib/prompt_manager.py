@@ -37,18 +37,192 @@ class PromptManager:
             return
     
     def _get_complete_schema(self) -> Dict[str, Dict]:
-        """Define the complete expected schema matching the DB checker"""
+        """
+        COMPLETE 38-PROPERTY SCHEMA DEFINITION
+        Single source of truth for ALL database properties with validation rules
+        """
         return {
-            # Core identification fields
+            # ═══════════════════════════════════════════════════════════════
+            # TITLE PROPERTIES (1)
+            # ═══════════════════════════════════════════════════════════════
             "Prompt ID": {
                 "type": "title",
                 "required": True,
-                "description": "Primary identifier - auto-title field"
+                "description": "Primary identifier - auto-title field",
+                "validation": "non_empty_string"
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # RICH_TEXT PROPERTIES (16) 
+            # ═══════════════════════════════════════════════════════════════
+            "Author": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Prompt creator/author",
+                "validation": "string",
+                "default": ""
+            },
+            "Context": {
+                "type": "rich_text", 
+                "required": False,
+                "description": "Background and environmental setup",
+                "validation": "string",
+                "default": ""
+            },
+            "Core Message": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Central theme or message",
+                "validation": "string",
+                "default": ""
+            },
+            "DNA Hash": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Content fingerprint for uniqueness tracking", 
+                "validation": "string",
+                "default": ""
+            },
+            "Execution Parameters": {
+                "type": "rich_text",
+                "required": False,
+                "description": "JSON configuration parameters",
+                "validation": "string",
+                "default": ""
+            },
+            "Few-Shot Examples": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Training examples and demonstrations",
+                "validation": "string", 
+                "default": ""
+            },
+            "Instruction": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Core behavioral directives",
+                "validation": "string",
+                "default": ""
+            },
+            "Language": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Primary language (en, de, etc.)",
+                "validation": "string",
+                "default": "en"
+            },
+            "Notes": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Usage notes and tips",
+                "validation": "string",
+                "default": ""
+            },
+            "Output Format": {
+                "type": "rich_text",
+                "required": False,
+                "description": "How responses should be structured",
+                "validation": "string",
+                "default": ""
+            },
+            "Parent Prompts": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Parent prompt relationships (ROOT for top-level)",
+                "validation": "string",
+                "default": "ROOT"
+            },
+            "Personality Mix": {
+                "type": "rich_text",
+                "required": False,
+                "description": "JSON of personality trait ratios",
+                "validation": "string",
+                "default": ""
+            },
+            "Purpose": {
+                "type": "rich_text",
+                "required": True,
+                "description": "What this prompt achieves",
+                "validation": "non_empty_string"
+            },
+            "System Instructions": {
+                "type": "rich_text",
+                "required": False,
+                "description": "Core AI personality and role definition",
+                "validation": "string",
+                "default": ""
+            },
+            "User Input Expectation": {
+                "type": "rich_text",
+                "required": False,
+                "description": "What kind of input to expect",
+                "validation": "string",
+                "default": ""
             },
             "Version": {
                 "type": "rich_text",
                 "required": True,
-                "description": "Version number (semantic versioning)"
+                "description": "Semantic version number",
+                "validation": "non_empty_string"
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # SELECT PROPERTIES (5)
+            # ═══════════════════════════════════════════════════════════════
+            "Cynefin Zone": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "simple", "color": "green"},
+                    {"name": "complicated", "color": "blue"},
+                    {"name": "complex", "color": "yellow"},
+                    {"name": "chaotic", "color": "red"},
+                    {"name": "disorder", "color": "gray"}
+                ],
+                "description": "Cynefin complexity domain",
+                "validation": "select_option",
+                "default": None
+            },
+            "Health Status": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "Healthy", "color": "green"},
+                    {"name": "Needs Optimization", "color": "yellow"},
+                    {"name": "Problematic", "color": "red"},
+                    {"name": "Excellent", "color": "blue"},
+                    {"name": "Unanalyzed", "color": "gray"}
+                ],
+                "description": "Current health assessment",
+                "validation": "select_option",
+                "default": "Unanalyzed"
+            },
+            "Personality Intensity": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "40%", "color": "gray"},
+                    {"name": "50%", "color": "blue"},
+                    {"name": "60%", "color": "green"},
+                    {"name": "70%", "color": "yellow"},
+                    {"name": "80%", "color": "red"}
+                ],
+                "description": "Personality strength setting",
+                "validation": "select_option",
+                "default": None
+            },
+            "Security Level": {
+                "type": "select",
+                "required": False,
+                "options": [
+                    {"name": "public", "color": "green"},
+                    {"name": "client", "color": "blue"},
+                    {"name": "private", "color": "orange"},
+                    {"name": "classified", "color": "red"}
+                ],
+                "description": "Access control level",
+                "validation": "select_option",
+                "default": "public"
             },
             "Type": {
                 "type": "select",
@@ -62,83 +236,13 @@ class PromptManager:
                     {"name": "viral", "color": "orange"},
                     {"name": "coding-companion", "color": "pink"}
                 ],
-                "description": "Prompt category classification"
-            },
-            "Purpose": {
-                "type": "rich_text",
-                "required": True,
-                "description": "What this prompt achieves"
+                "description": "Prompt category classification",
+                "validation": "select_option"
             },
             
-            # Content and structure
-            "Full Prompt": {
-                "type": "rich_text",
-                "required": True,
-                "description": "Complete prompt content"
-            },
-            "Core Message": {
-                "type": "rich_text",
-                "required": False,
-                "description": "Central theme or message"
-            },
-            
-            # Archaeological analysis fields (SYNCHRONIZED WITH DB CHECKER)
-            "DNA Hash": {
-                "type": "rich_text",
-                "required": False,
-                "description": "Content fingerprint for uniqueness tracking"
-            },
-            "Complexity Score": {
-                "type": "number",
-                "required": False,
-                "description": "Calculated complexity rating (0-10)"
-            },
-            "Effectiveness Score": {
-                "type": "number",
-                "required": False,
-                "description": "Predicted effectiveness (0-1)"
-            },
-            "Personality Mix": {
-                "type": "rich_text",
-                "required": False,
-                "description": "JSON of personality trait ratios"
-            },
-            "Analysis Date": {
-                "type": "date",
-                "required": False,
-                "description": "When last analyzed"
-            },
-            "Health Status": {
-                "type": "select",
-                "required": False,
-                "options": [
-                    {"name": "Healthy", "color": "green"},
-                    {"name": "Needs Optimization", "color": "yellow"},
-                    {"name": "Problematic", "color": "red"},
-                    {"name": "Excellent", "color": "blue"},
-                    {"name": "Unanalyzed", "color": "gray"}
-                ],
-                "description": "Current health assessment"
-            },
-            "Viral Coefficient": {
-                "type": "number",
-                "required": False,
-                "description": "Meme propagation potential (0-1)"
-            },
-            
-            # Multi-select categorization (MATCHING DB CHECKER)
-            "Viral Hooks": {
-                "type": "multi_select",
-                "required": False,
-                "options": [
-                    {"name": "Complexity Whisperer", "color": "green"},
-                    {"name": "KHAOS", "color": "red"},
-                    {"name": "Meme Machine", "color": "orange"},
-                    {"name": "Schrödinger's Agile", "color": "blue"},
-                    {"name": "AI Act Navigator", "color": "purple"}
-                ],
-                "description": "Memorable phrases and concepts"
-            },
+            # ═══════════════════════════════════════════════════════════════
+            # MULTI_SELECT PROPERTIES (4)
+            # ═══════════════════════════════════════════════════════════════
             "Models": {
                 "type": "multi_select",
                 "required": False,
@@ -151,7 +255,28 @@ class PromptManager:
                     {"name": "Grok 3", "color": "orange"},
                     {"name": "Gemini 2.5 Pro", "color": "pink"}
                 ],
-                "description": "Compatible AI models"
+                "description": "Compatible AI models",
+                "validation": "multi_select_options",
+                "default": []
+            },
+            "Tags": {
+                "type": "multi_select",
+                "required": False,
+                "options": [
+                    {"name": "meta", "color": "red"},
+                    {"name": "template", "color": "blue"},
+                    {"name": "orchestration", "color": "green"},
+                    {"name": "persona", "color": "yellow"},
+                    {"name": "core", "color": "purple"},
+                    {"name": "sarcasm", "color": "orange"},
+                    {"name": "consulting", "color": "pink"},
+                    {"name": "transformation", "color": "gray"},
+                    {"name": "complexity", "color": "brown"},
+                    {"name": "optimization", "color": "default"}
+                ],
+                "description": "Searchable categorization tags",
+                "validation": "multi_select_options",
+                "default": []
             },
             "Usage Contexts": {
                 "type": "multi_select",
@@ -164,73 +289,139 @@ class PromptManager:
                     {"name": "Content Creation", "color": "orange"},
                     {"name": "Consulting", "color": "red"}
                 ],
-                "description": "Where this prompt is used"
+                "description": "Where this prompt is used",
+                "validation": "multi_select_options",
+                "default": []
             },
-            "Tags": {
+            "Viral Hooks": {
                 "type": "multi_select",
                 "required": False,
                 "options": [
-                    {"name": "persona", "color": "red"},
-                    {"name": "core", "color": "blue"},
-                    {"name": "sarcasm", "color": "orange"},
-                    {"name": "consulting", "color": "green"},
-                    {"name": "transformation", "color": "purple"},
-                    {"name": "complexity", "color": "yellow"},
-                    {"name": "optimization", "color": "pink"}
+                    {"name": "Schrödinger's Agile", "color": "blue"},
+                    {"name": "Complexity Whisperer", "color": "green"},
+                    {"name": "AI Act Navigator", "color": "purple"},
+                    {"name": "Meme Machine", "color": "orange"},
+                    {"name": "KHAOS", "color": "red"},
+                    {"name": "TARS-style wit", "color": "yellow"},
+                    {"name": "Philosophical Musings", "color": "gray"},
+                    {"name": "Optimization Addict", "color": "pink"},
+                    {"name": "Digital Archaeologist", "color": "brown"},
+                    {"name": "Prompt DNA", "color": "default"},
+                    {"name": "Archaeological Analysis", "color": "default"}
                 ],
-                "description": "Searchable tags"
+                "description": "Memorable phrases and concepts",
+                "validation": "multi_select_options",
+                "default": []
             },
             
-            # Metadata and tracking
-            "Creation Date": {
-                "type": "date",
+            # ═══════════════════════════════════════════════════════════════
+            # NUMBER PROPERTIES (5)
+            # ═══════════════════════════════════════════════════════════════
+            "Complexity Score": {
+                "type": "number",
                 "required": False,
-                "description": "When prompt was created"
+                "description": "Calculated complexity rating (0-10)",
+                "validation": "number_range",
+                "min_value": 0,
+                "max_value": 10,
+                "default": None
             },
-            "Last Modified": {
-                "type": "date",
+            "Effectiveness Score": {
+                "type": "number", 
                 "required": False,
-                "description": "When prompt was last updated"
-            },
-            "Parent Prompt": {
-                "type": "relation",
-                "required": False,
-                "description": "Parent-child relationships for lineage"
+                "description": "Predicted effectiveness (0-1)",
+                "validation": "number_range",
+                "min_value": 0,
+                "max_value": 1,
+                "default": None
             },
             "Generation": {
                 "type": "number",
                 "required": False,
-                "description": "Evolution generation number"
+                "description": "Evolution generation number",
+                "validation": "number_range",
+                "min_value": 0,
+                "max_value": None,
+                "default": 0
             },
-            
-            # Configuration fields
             "Temperature": {
                 "type": "number",
                 "required": False,
-                "description": "AI model temperature setting"
+                "description": "AI model temperature setting (0.0-1.0)",
+                "validation": "number_range",
+                "min_value": 0.0,
+                "max_value": 1.0,
+                "default": None
             },
-            "Personality Intensity": {
-                "type": "select",
+            "Viral Coefficient": {
+                "type": "number",
                 "required": False,
-                "options": [
-                    {"name": "40%", "color": "gray"},
-                    {"name": "50%", "color": "blue"},
-                    {"name": "60%", "color": "green"},
-                    {"name": "70%", "color": "yellow"},
-                    {"name": "80%", "color": "red"}
-                ],
-                "description": "Personality strength setting"
+                "description": "Meme propagation potential (0-1)",
+                "validation": "number_range",
+                "min_value": 0,
+                "max_value": 1,
+                "default": None
             },
-            "Security Level": {
-                "type": "select",
+            
+            # ═══════════════════════════════════════════════════════════════
+            # DATE PROPERTIES (5)
+            # ═══════════════════════════════════════════════════════════════
+            "Analysis Date": {
+                "type": "date",
                 "required": False,
-                "options": [
-                    {"name": "public", "color": "green"},
-                    {"name": "client", "color": "blue"},
-                    {"name": "private", "color": "orange"},
-                    {"name": "classified", "color": "red"}
-                ],
-                "description": "Access control level"
+                "description": "When last analyzed for health/effectiveness",
+                "validation": "iso_date",
+                "default": None
+            },
+            "Creation Date": {
+                "type": "date",
+                "required": False,
+                "description": "When prompt was created",
+                "validation": "iso_date",
+                "default": None
+            },
+            "Last Analysis Date": {
+                "type": "date",
+                "required": False,
+                "description": "When last archaeological analysis was performed",
+                "validation": "iso_date",
+                "default": None
+            },
+            "Last Modification Date": {
+                "type": "date",
+                "required": False,
+                "description": "When prompt was last updated",
+                "validation": "iso_date",
+                "default": None
+            },
+            "Last Modified": {
+                "type": "date",
+                "required": False,
+                "description": "When prompt was last updated (duplicate field)",
+                "validation": "iso_date",
+                "default": None
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # RELATION PROPERTIES (1)
+            # ═══════════════════════════════════════════════════════════════
+            "Parent Prompt": {
+                "type": "relation",
+                "required": False,
+                "description": "Parent-child relationships for lineage tracking",
+                "validation": "relation_id",
+                "default": None
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # FORMULA PROPERTIES (1) - READ ONLY
+            # ═══════════════════════════════════════════════════════════════
+            "Full Prompt": {
+                "type": "formula",
+                "required": False,
+                "description": "Complete formatted prompt (generated from all fields)",
+                "validation": "read_only",
+                "default": ""
             }
         }
     
@@ -602,34 +793,33 @@ class PromptManager:
     # ENHANCED READ METHOD (INCLUDES ANALYSIS DATA)
     # ═══════════════════════════════════════════════════════════════
     
-    def read_prompt(self, prompt_id, include_analysis=False):
+    def read_prompt(self, prompt_id: str, include_all_properties: bool = True) -> Optional[Dict[str, Any]]:
         """
-        ENHANCED: Retrieve prompt with optional analysis data
-        Now includes archaeological analysis fields when requested
+        COMPLETE 38-PROPERTY SOVEREIGNTY READ OPERATION
+        Retrieves ALL database properties with proper type handling and validation
+        
+        Args:
+            prompt_id: Unique identifier for the prompt
+            include_all_properties: If True, retrieves all 38 properties; if False, only core content
+        
+        Returns:
+            Dict containing all prompt data with proper type conversion, or None if not found
         """
         try:
-            # Get the database to determine the title property name
+            # Get database schema for title property identification
             db = self.notion.databases.retrieve(database_id=self.database_id)
-            title_property_name = None
-            
-            # Find the title property
-            for prop_name, prop in db['properties'].items():
-                if prop['type'] == 'title':
-                    title_property_name = prop_name
-                    break
+            title_property_name = self._get_title_property_name(db)
             
             if not title_property_name:
                 print("❌ Error: No title property found in the database")
-                return False
+                return None
             
             # Query the database for the prompt
             response = self.notion.databases.query(
                 database_id=self.database_id,
                 filter={
                     "property": title_property_name,
-                    "title": {
-                        "equals": prompt_id
-                    }
+                    "title": {"equals": prompt_id}
                 }
             )
             
@@ -639,46 +829,91 @@ class PromptManager:
                 
             page = response['results'][0]
             
-            # Extract all content data for full prompt display
-            extracted_data = {
-                "id": page['id'],
-                "Prompt ID": self._extract_text_property(page, title_property_name),
-                "Version": self._extract_text_property(page, 'Version'),
-                "Type": self._extract_select_property(page, 'Type'),
-                "Purpose": self._extract_text_property(page, 'Purpose'),
-                "Context": self._extract_text_property(page, 'Context'),
-                "System Instructions": self._extract_text_property(page, 'System Instructions'),
-                "Instruction": self._extract_text_property(page, 'Instruction'),
-                "User Input Expectation": self._extract_text_property(page, 'User Input Expectation'),
-                "Output Format": self._extract_text_property(page, 'Output Format'),
-                "Few-Shot Examples": self._extract_text_property(page, 'Few-Shot Examples'),
-                "Notes": self._extract_text_property(page, 'Notes'),
-                "Author": self._extract_text_property(page, 'Author'),
-                "Language": self._extract_text_property(page, 'Language'),
-                "Execution Parameters": self._extract_text_property(page, 'Execution Parameters'),
-                "Personality Mix": self._extract_text_property(page, 'Personality Mix'),
-                "Parent Prompts": self._extract_text_property(page, 'Parent Prompts'),
-                "Full Prompt": self._extract_text_property(page, 'Full Prompt')
+            # Extract ALL 38 properties with type-safe extraction
+            extracted_data = {"id": page['id']}
+            populated_count = 0
+            
+            for prop_name, prop_schema in self.expected_schema.items():
+                try:
+                    value = self._extract_property_by_type(page, prop_name, prop_schema)
+                    extracted_data[prop_name] = value
+                    
+                    # Count populated properties (non-empty, non-None values)
+                    if self._is_property_populated_value(value):
+                        populated_count += 1
+                        
+                except Exception as e:
+                    # Graceful degradation - use default value
+                    extracted_data[prop_name] = prop_schema.get('default', None)
+                    print(f"⚠️  Property extraction failed for {prop_name}: {e}")
+            
+            # Add metadata about property population
+            extracted_data["_metadata"] = {
+                "populated_properties": populated_count,
+                "total_properties": len(self.expected_schema),
+                "population_percentage": (populated_count / len(self.expected_schema)) * 100,
+                "extraction_timestamp": datetime.now().isoformat()
             }
             
-            # Include analysis data if requested
-            if include_analysis:
-                extracted_data.update({
-                    "DNA Hash": self._extract_text_property(page, 'DNA Hash'),
-                    "Complexity Score": self._extract_number_property(page, 'Complexity Score'),
-                    "Effectiveness Score": self._extract_number_property(page, 'Effectiveness Score'),
-                    "Personality Mix": self._extract_text_property(page, 'Personality Mix'),
-                    "Analysis Date": self._extract_date_property(page, 'Analysis Date'),
-                    "Health Status": self._extract_select_property(page, 'Health Status'),
-                    "Viral Coefficient": self._extract_number_property(page, 'Viral Coefficient')
-                })
-            
-            print(f"✅ Retrieved prompt: {prompt_id}")
+            print(f"✅ Retrieved prompt: {prompt_id} ({populated_count}/{len(self.expected_schema)} properties populated)")
             return extracted_data
             
         except Exception as e:
             print(f"❌ Error reading prompt: {e}")
             return None
+    
+    def _get_title_property_name(self, db: Dict) -> Optional[str]:
+        """Find the title property name in the database schema"""
+        for prop_name, prop in db['properties'].items():
+            if prop['type'] == 'title':
+                return prop_name
+        return None
+    
+    def _extract_property_by_type(self, page: Dict, prop_name: str, prop_schema: Dict) -> Any:
+        """
+        Extract property value based on its type with proper conversion
+        
+        Args:
+            page: Notion page object
+            prop_name: Name of the property to extract
+            prop_schema: Schema definition for the property
+            
+        Returns:
+            Properly typed value for the property
+        """
+        prop_type = prop_schema['type']
+        
+        if prop_type == 'title':
+            return self._extract_text_property(page, prop_name)
+        elif prop_type == 'rich_text':
+            return self._extract_text_property(page, prop_name)
+        elif prop_type == 'select':
+            return self._extract_select_property(page, prop_name)
+        elif prop_type == 'multi_select':
+            return self._extract_multi_select_property(page, prop_name)
+        elif prop_type == 'number':
+            return self._extract_number_property(page, prop_name)
+        elif prop_type == 'date':
+            return self._extract_date_property(page, prop_name)
+        elif prop_type == 'relation':
+            return self._extract_relation_property(page, prop_name)
+        elif prop_type == 'formula':
+            return self._extract_formula_property(page, prop_name)
+        else:
+            print(f"⚠️  Unknown property type: {prop_type} for {prop_name}")
+            return prop_schema.get('default', None)
+    
+    def _is_property_populated_value(self, value: Any) -> bool:
+        """Check if a property value is considered 'populated' (not empty/None)"""
+        if value is None:
+            return False
+        if isinstance(value, str) and value.strip() == "":
+            return False
+        if isinstance(value, list) and len(value) == 0:
+            return False
+        if isinstance(value, dict) and len(value) == 0:
+            return False
+        return True
     
     def _extract_text_property(self, page, prop_name):
         """Helper to safely extract rich text properties"""
@@ -714,6 +949,45 @@ class PromptManager:
             prop = page['properties'].get(prop_name, {})
             if prop.get('date'):
                 return prop['date']['start']
+            return None
+        except:
+            return None
+    
+    def _extract_multi_select_property(self, page, prop_name):
+        """Helper to safely extract multi-select properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            if prop.get('multi_select'):
+                return [option['name'] for option in prop['multi_select']]
+            return []
+        except:
+            return []
+    
+    def _extract_relation_property(self, page, prop_name):
+        """Helper to safely extract relation properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            if prop.get('relation'):
+                return [rel['id'] for rel in prop['relation']]
+            return []
+        except:
+            return []
+    
+    def _extract_formula_property(self, page, prop_name):
+        """Helper to safely extract formula properties"""
+        try:
+            prop = page['properties'].get(prop_name, {})
+            if prop.get('formula'):
+                formula_value = prop['formula']
+                # Formula can contain different types
+                if formula_value.get('string'):
+                    return formula_value['string']
+                elif formula_value.get('number'):
+                    return formula_value['number']
+                elif formula_value.get('boolean'):
+                    return formula_value['boolean']
+                elif formula_value.get('date'):
+                    return formula_value['date']['start'] if formula_value['date'] else None
             return ""
         except:
             return ""
