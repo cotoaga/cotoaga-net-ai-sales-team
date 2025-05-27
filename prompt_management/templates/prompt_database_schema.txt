@@ -1,0 +1,160 @@
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Enum types
+CREATE TYPE security_level AS ENUM ('public', 'client', 'private', 'classified');
+CREATE TYPE health_status AS ENUM ('excellent', 'healthy', 'needs_optimization', 'problematic', 'unanalyzed');
+CREATE TYPE cynefin_zone AS ENUM ('simple', 'complicated', 'complex', 'chaotic', 'disorder');
+CREATE TYPE user_role AS ENUM ('admin', 'editor', 'viewer');
+CREATE TYPE prompt_type AS ENUM ('meta', 'consultation', 'workshop', 'analysis', 'creation', 'viral', 'coding-companion');
+
+-- Users table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email TEXT UNIQUE NOT NULL,
+    name TEXT,
+    role user_role DEFAULT 'viewer',
+    created_at TIMESTAMPTZ DEFAULT now(),
+    CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+);
+
+-- Models table
+CREATE TABLE models (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT UNIQUE NOT NULL,
+    provider TEXT NOT NULL,
+    default_parameters JSONB,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Prompts table
+CREATE TABLE prompts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    prompt_id TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL,
+    version TEXT NOT NULL,
+    purpose TEXT NOT NULL,
+    content JSONB NOT NULL,
+    type prompt_type NOT NULL,
+    language TEXT DEFAULT 'en',
+    author_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    security_level security_level DEFAULT 'public',
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    tags TEXT[] DEFAULT '{}',
+    CHECK (purpose <> ''),
+    CHECK (version ~ '^\d+\.\d+\.\d+$')
+);
+
+-- Prompt analytics table
+CREATE TABLE prompt_analytics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+    dna_hash TEXT NOT NULL,
+    complexity_score NUMERIC(4,2) CHECK (complexity_score BETWEEN 0 AND 10),
+    effectiveness_score NUMERIC(4,3) CHECK (effectiveness_score BETWEEN 0 AND 1),
+    viral_coefficient NUMERIC(4,3) CHECK (viral_coefficient BETWEEN 0 AND 1),
+    personality_mix JSONB,
+    health_status health_status DEFAULT 'unanalyzed',
+    analysis_date TIMESTAMPTZ DEFAULT now(),
+    token_count INTEGER,
+    personality_conflicts INTEGER DEFAULT 0,
+    cynefin_zone cynefin_zone
+);
+
+-- Prompt relations table
+CREATE TABLE prompt_relations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    parent_prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+    child_prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+    generation INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (parent_prompt_id, child_prompt_id),
+    CHECK (parent_prompt_id <> child_prompt_id)
+);
+
+-- Prompt outputs table
+CREATE TABLE prompt_outputs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+    model_id UUID REFERENCES models(id) ON DELETE SET NULL,
+    output TEXT,
+    response_quality_score NUMERIC(4,3) CHECK (response_quality_score BETWEEN 0 AND 1),
+    latency_ms INTEGER,
+    user_feedback JSONB,
+    executed_at TIMESTAMPTZ DEFAULT now(),
+    parameters JSONB
+);
+
+-- Prompt usage contexts table
+CREATE TABLE prompt_usage_contexts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+    context TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (prompt_id, context)
+);
+
+-- Prompt viral hooks table
+CREATE TABLE prompt_viral_hooks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
+    hook TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (prompt_id, hook)
+);
+
+-- Indexes for performance
+CREATE INDEX idx_prompts_prompt_id ON prompts(prompt_id);
+CREATE INDEX idx_prompts_type ON prompts(type);
+CREATE INDEX idx_prompts_tags ON prompts USING GIN(tags);
+CREATE INDEX idx_prompts_content ON prompts USING GIN(content);
+CREATE INDEX idx_prompt_analytics_prompt_id ON prompt_analytics(prompt_id);
+CREATE INDEX idx_prompt_analytics_analysis_date ON prompt_analytics(analysis_date);
+CREATE INDEX idx_prompt_analytics_personality_mix ON prompt_analytics USING GIN(personality_mix);
+CREATE INDEX idx_prompt_relations_parent ON prompt_relations(parent_prompt_id);
+CREATE INDEX idx_prompt_relations_child ON prompt_relations(child_prompt_id);
+CREATE INDEX idx_prompt_outputs_prompt_id ON prompt_outputs(prompt_id);
+CREATE INDEX idx_prompt_outputs_model_id ON prompt_outputs(model_id);
+CREATE INDEX idx_prompt_outputs_executed_at ON prompt_outputs(executed_at);
+CREATE INDEX idx_prompt_usage_contexts_prompt_id ON prompt_usage_contexts(prompt_id);
+CREATE INDEX idx_prompt_usage_contexts_context ON prompt_usage_contexts(context);
+CREATE INDEX idx_prompt_viral_hooks_prompt_id ON prompt_viral_hooks(prompt_id);
+CREATE INDEX idx_prompt_viral_hooks_hook ON prompt_viral_hooks(hook);
+
+-- Enable RLS
+ALTER TABLE prompts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prompt_analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prompt_relations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prompt_outputs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE models ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prompt_usage_contexts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prompt_viral_hooks ENABLE ROW LEVEL SECURITY;
+
+-- Basic RLS policies (adjust as needed)
+CREATE POLICY prompts_select ON prompts FOR SELECT USING (
+    security_level = 'public' OR 
+    (security_level IN ('client', 'private', 'classified') AND auth.uid() = author_id)
+);
+CREATE POLICY prompts_insert ON prompts FOR INSERT WITH CHECK (
+    auth.role() IN ('authenticated') AND 
+    (security_level = 'public' OR auth.uid() = author_id)
+);
+CREATE POLICY prompts_update ON prompts FOR UPDATE USING (
+    auth.uid() = author_id OR auth.role() = 'admin'
+);
+
+-- Trigger to update updated_at
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER prompts_update_trigger
+    BEFORE UPDATE ON prompts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at();
